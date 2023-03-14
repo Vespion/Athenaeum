@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{367FC78B-9A55-4E62-80BC-50E1A1AF1978}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{0C0F5BAF-CEA2-41DA-9631-036B797BA781}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{DF981CA5-B095-415D-AE98-AFEDB81D7303}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Filesystem", "Filesystem", "{5FF9D66F-CD20-410D-AF44-13C35E33C487}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Console", "Console", "{711301DC-9F50-4C85-AAAE-8ED37ED57EF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginAbstractions", "src\plugins\PluginAbstractions\PluginAbstractions.csproj", "{02A0F747-1C4D-4816-AC53-0D84933CA237}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoragePluginAbstractions", "src\plugins\storage\StoragePluginAbstractions\StoragePluginAbstractions.csproj", "{D6E456A9-419D-4BCB-8CD7-F1F0D1888C16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilesystemStorage", "src\plugins\storage\FilesystemStorage\FilesystemStorage.csproj", "{C5B09D74-AF30-4B20-BCE5-CA18E5814320}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "src\clients\ConsoleClient\ConsoleClient.csproj", "{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DF981CA5-B095-415D-AE98-AFEDB81D7303} = {367FC78B-9A55-4E62-80BC-50E1A1AF1978}
+		{5FF9D66F-CD20-410D-AF44-13C35E33C487} = {DF981CA5-B095-415D-AE98-AFEDB81D7303}
+		{711301DC-9F50-4C85-AAAE-8ED37ED57EF6} = {0C0F5BAF-CEA2-41DA-9631-036B797BA781}
+		{02A0F747-1C4D-4816-AC53-0D84933CA237} = {367FC78B-9A55-4E62-80BC-50E1A1AF1978}
+		{D6E456A9-419D-4BCB-8CD7-F1F0D1888C16} = {DF981CA5-B095-415D-AE98-AFEDB81D7303}
+		{C5B09D74-AF30-4B20-BCE5-CA18E5814320} = {5FF9D66F-CD20-410D-AF44-13C35E33C487}
+		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D} = {711301DC-9F50-4C85-AAAE-8ED37ED57EF6}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02A0F747-1C4D-4816-AC53-0D84933CA237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A0F747-1C4D-4816-AC53-0D84933CA237}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02A0F747-1C4D-4816-AC53-0D84933CA237}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02A0F747-1C4D-4816-AC53-0D84933CA237}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6E456A9-419D-4BCB-8CD7-F1F0D1888C16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6E456A9-419D-4BCB-8CD7-F1F0D1888C16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6E456A9-419D-4BCB-8CD7-F1F0D1888C16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6E456A9-419D-4BCB-8CD7-F1F0D1888C16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5B09D74-AF30-4B20-BCE5-CA18E5814320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5B09D74-AF30-4B20-BCE5-CA18E5814320}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5B09D74-AF30-4B20-BCE5-CA18E5814320}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5B09D74-AF30-4B20-BCE5-CA18E5814320}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
