@@ -5,6 +5,41 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>VespionSoftworks.Athenaeum.Clients.ConsoleClient</AssemblyName>
+        <RootNamespace>VespionSoftworks.Athenaeum.Clients.ConsoleClient</RootNamespace>
+        <Authors>Vespion</Authors>
+        <Company>Vespion Softworks</Company>
+        <Copyright>Vespion Softworks</Copyright>
+        <RepositoryType>git</RepositoryType>
+        <Title>Athenaeum Console Client</Title>
+        <Description>Provides a CLI for interacting with Athenaeum</Description>
+        <PackageTags>Athenaeum</PackageTags>
     </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+        <PackageReference Include="Scrutor" Version="4.2.1" />
+        <PackageReference Include="Spectre.Console" Version="0.46.0" />
+        <PackageReference Include="Spectre.Console.Analyzer" Version="0.46.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.Development.json" Condition=" $(Configuration) == 'Debug'">
+        <DependentUpon>appsettings.json</DependentUpon>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\plugins\PluginAbstractions\PluginAbstractions.csproj" />
+      <ProjectReference Include="..\..\plugins\storage\StoragePluginAbstractions\StoragePluginAbstractions.csproj" />
+      <ProjectReference Include="..\..\utilities\PluginHostUtilities\PluginHostUtilities.csproj" />
+    </ItemGroup>
 
 </Project>

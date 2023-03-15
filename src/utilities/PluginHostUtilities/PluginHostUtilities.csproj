@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities</AssemblyName>
+        <RootNamespace>VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities</RootNamespace>
+        <Authors>Vespion</Authors>
+        <Copyright>Vespion Softworks</Copyright>
+        <RepositoryType>git</RepositoryType>
+        <Title>Athenaeum Plugin Host Utlities</Title>
+        <Description>Utility types and services for Athenaeum plugin hosts/clients</Description>
+        <PackageTags>Athenaeum</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="7.0.0" />
+      <PackageReference Include="NuGet.PackageManagement" Version="6.5.0" />
+      <PackageReference Include="NuGet.Packaging" Version="6.5.0" />
+      <PackageReference Include="NuGet.Protocol" Version="6.5.0" />
+    </ItemGroup>
+
+</Project>
