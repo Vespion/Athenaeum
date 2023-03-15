@@ -1,5 +1,5 @@
-using Cake.Common.Tools.DotNetCore;
-using Cake.Common.Tools.DotNetCore.Pack;
+using Cake.Common.Tools.DotNet;
+using Cake.Common.Tools.DotNet.Pack;
 using Cake.Frosting;
 
 namespace VespionSoftworks.Athenaeum.Build.BaseTasks
@@ -12,13 +12,13 @@ namespace VespionSoftworks.Athenaeum.Build.BaseTasks
 		/// <inheritdoc />
 		public override void Run(BuildContext context)
 		{
-			context.DotNetCorePack(ProjectDirectory, new DotNetCorePackSettings
+			context.DotNetPack(ProjectDirectory, new DotNetPackSettings
 			{
 				NoBuild = true,
 				NoRestore = true,
 				IncludeSymbols = false,
 				Configuration = context.BuildConfiguration,
-				Verbosity = DotNetCoreVerbosity.Normal,
+				Verbosity = DotNetVerbosity.Normal,
 				OutputDirectory = context.Environment.WorkingDirectory
 					.Combine("artifacts").Combine(ArtifactSubDirectory)
 			});

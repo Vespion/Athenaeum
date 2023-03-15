@@ -1,8 +1,8 @@
 using System.IO;
 using System.Linq;
 using Cake.Common.IO;
-using Cake.Common.Tools.DotNetCore;
-using Cake.Common.Tools.DotNetCore.NuGet.Push;
+using Cake.Common.Tools.DotNet;
+using Cake.Common.Tools.DotNet.NuGet.Push;
 using Cake.Frosting;
 
 namespace VespionSoftworks.Athenaeum.Build.BaseTasks
@@ -25,7 +25,7 @@ namespace VespionSoftworks.Athenaeum.Build.BaseTasks
 				.OrderByDescending(x => x.LastWriteTime)
 				.First();
 			
-			context.DotNetCoreNuGetPush(pkg.FullName, new DotNetCoreNuGetPushSettings
+			context.DotNetNuGetPush(pkg.FullName, new DotNetNuGetPushSettings
 			{
 				Source = context.PluginFeed,
 				ApiKey = context.PluginFeedKey

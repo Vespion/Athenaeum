@@ -1,7 +1,7 @@
 using System.Linq;
 using Cake.Common.IO;
-using Cake.Common.Tools.DotNetCore;
-using Cake.Common.Tools.DotNetCore.NuGet.Delete;
+using Cake.Common.Tools.DotNet;
+using Cake.Common.Tools.DotNet.NuGet.Delete;
 using Cake.Core.IO;
 using Cake.Frosting;
 using Path = System.IO.Path;
@@ -15,7 +15,7 @@ namespace VespionSoftworks.Athenaeum.Build.BaseTasks
 		/// <inheritdoc />
 		public override void Run(BuildContext context)
 		{
-			context.DotNetCoreClean(ProjectFile);
+			context.DotNetClean(ProjectFile);
 		}
 	}
 	
@@ -55,7 +55,7 @@ namespace VespionSoftworks.Athenaeum.Build.BaseTasks
 				var pkgName = string.Join('.', name.SkipLast(3));
 				var pkgVersion = string.Join('.', name.TakeLast(3));
 				
-				context.DotNetCoreNuGetDelete(pkgName, pkgVersion, new DotNetCoreNuGetDeleteSettings
+				context.DotNetNuGetDelete(pkgName, pkgVersion, new DotNetNuGetDeleteSettings
 				{
 					Source = context.PluginFeed,
 					ApiKey = context.PluginFeedKey,

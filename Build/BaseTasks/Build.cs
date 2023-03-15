@@ -1,5 +1,5 @@
-using Cake.Common.Tools.DotNetCore;
-using Cake.Common.Tools.DotNetCore.Build;
+using Cake.Common.Tools.DotNet;
+using Cake.Common.Tools.DotNet.Build;
 using Cake.Frosting;
 
 namespace VespionSoftworks.Athenaeum.Build.BaseTasks
@@ -11,14 +11,14 @@ namespace VespionSoftworks.Athenaeum.Build.BaseTasks
 		/// <inheritdoc />
 		public override void Run(BuildContext context)
 		{
-			context.DotNetCoreBuild(ProjectDirectory, new DotNetCoreBuildSettings
+			context.DotNetBuild(ProjectDirectory, new DotNetBuildSettings
 			{
 				Configuration = context.BuildConfiguration,
 				NoRestore = false,
 				NoDependencies = true,
 				NoIncremental = false,
 				NoLogo = true,
-				Verbosity = DotNetCoreVerbosity.Normal
+				Verbosity = DotNetVerbosity.Normal
 			});
 		}
 	}

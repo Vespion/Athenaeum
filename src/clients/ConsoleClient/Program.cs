@@ -2,16 +2,20 @@
 
 using System.Reflection;
 using System.Runtime.InteropServices;
+using CommandDotNet;
+using CommandDotNet.Builders;
+using CommandDotNet.Help;
+using CommandDotNet.IoC.MicrosoftDependencyInjection;
+using CommandDotNet.NameCasing;
+using CommandDotNet.Spectre;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging.EventLog;
 using Spectre.Console;
-using VespionSoftworks.Athenaeum.Clients.ConsoleClient;
-using VespionSoftworks.Athenaeum.Plugins.Abstractions;
-using VespionSoftworks.Athenaeum.Plugins.Storage.Abstractions;
+using VespionSoftworks.Athenaeum.Clients.ConsoleClient.Commands;
+using VespionSoftworks.Athenaeum.Clients.ConsoleClient.Exceptions;
 using VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities;
-using VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities.Configuration;
 
 //Render header
 AnsiConsole.Write(
@@ -25,110 +29,98 @@ var copyright = ((AssemblyCopyrightAttribute)attribs[0]).Copyright;
 var assemblyName = assem.GetName();
 AnsiConsole.MarkupLine($"[grey]{copyright} - v{assemblyName.Version}[/]");
 
-//Build generic host
-IHost host = null!;
+var runner = new AppRunner<Root>();
+IServiceCollection services = new ServiceCollection();
+
 AnsiConsole.Status()
 	.AutoRefresh(true)
 	.Spinner(Spinner.Known.Dots12)
 	.Start("Starting host...", ctx =>
 	{
-		//Configure logging and shared services
-		var builder = Host.CreateDefaultBuilder(args)
-			.UseConsoleLifetime()
-			.ConfigureLogging(lb =>
-			{
-				lb.ClearProviders();
+		var configuration = new ConfigurationBuilder()
+			.AddJsonFile("appsettings.json", optional: true)
+			.AddJsonFile($"appsettings.Development.json", optional: true)
+			.AddEnvironmentVariables()
+			.Build();
 
-				lb.AddDebug();
-				lb.AddEventSourceLogger();
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-				{
-					lb.AddEventLog();
-				}
-			})
-			.ConfigureServices((context, services) =>
+		services.AddSingleton(configuration);
+		services.AddLogging(logging =>
+		{
+			var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+			// IMPORTANT: This needs to be added *before* configuration is loaded, this lets
+			// the defaults be overridden by the configuration.
+			if (isWindows)
 			{
-				services.AddPluginServices(context);
-				services.AddSingleton(AnsiConsole.Console);
+				// Default the EventLogLoggerProvider to warning or above
+				logging.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Warning);
+			}
+
+			logging.AddConfiguration(configuration.GetSection("Logging"));
+
+			logging.AddDebug();
+			logging.AddEventSourceLogger();
+
+			if (isWindows)
+			{
+				// Add the EventLogLoggerProvider on windows machines
+				logging.AddEventLog();
+			}
+
+			logging.Configure(options =>
+			{
+				options.ActivityTrackingOptions =
+					ActivityTrackingOptions.SpanId |
+					ActivityTrackingOptions.TraceId |
+					ActivityTrackingOptions.ParentId;
 			});
-		
-		//Resolve and bootstrap plugins
-		builder.ConfigureServices(x =>
-		{
-			ctx.Status("Discovering plugins...");
-			using (var pluginProvider = x.BuildServiceProvider())
-			{
-				var logger = pluginProvider.GetRequiredService<ILogger<Program>>();
-				var resolver = pluginProvider.GetRequiredService<IPluginResolutionService>();
-				
-				x.Scan(y =>
-				{
-					var pluginProgress = new Progress<string>(s => ctx.Status(s));
-					var resolutionTask = resolver.ResolvePluginsAsync(pluginProgress);
-
-					var pluginAssemblies = resolutionTask
-						.GetAwaiter()
-						.GetResult()
-						.Select(a =>
-						{
-							using (logger.BeginScope(new Dictionary<string, object> {{ "AssemblyPath", a }}))
-							{
-								try
-								{
-									logger.LogDebug("Loading assembly @ {AssemblyPath}", a);
-									return Assembly.LoadFrom(a);
-								}
-								catch (FileLoadException ex)
-								{
-									logger.LogDebug(ex,
-										"Failed to load assembly @ {AssemblyPath}, assembly will be excluded from scan",
-										a);
-									return null;
-								}
-							}
-						})
-						.Where(n => n != null)
-						.Select(b => b!);
-
-
-					y.FromAssemblies(pluginAssemblies)
-						.AddClasses(z =>
-						{
-							z.AssignableTo<IPluginBootstrapper>();
-						})
-						.AsImplementedInterfaces()
-						.WithTransientLifetime()
-						.AddClasses(z =>
-						{
-							z.AssignableTo<IStoragePlugin>();
-							z.AssignableTo<IAuthenticatedStoragePlugin>();
-						})
-						.AsImplementedInterfaces()
-						.WithScopedLifetime();
-					
-				});
-			}
-
-			ctx.Status("Initializing plugins...");
-			using (var bootstrapProvider = x.BuildServiceProvider())
-			{
-				var bootstrappers = bootstrapProvider.GetServices<IPluginBootstrapper>();
-				foreach (var bootstrapper in bootstrappers)
-				{
-					bootstrapper.ConfigureServices(x);
-				}
-			}
-			
-			ctx.Status("Starting host...")
-				.Spinner(Spinner.Known.Dots12);
 		});
 
-		builder.ConfigureServices(x =>
+		services.AddPluginServices(configuration);
+		services.AddSingleton(AnsiConsole.Console);
+
+		ctx.Status("Discovering plugins...");
+		var pluginProgress = new Progress<string>(s => ctx.Status(s));
+		services.ScanForPlugins(pluginProgress);
+
+		ctx.Status("Initializing plugins...");
+		services.BootstrapPlugins();
+
+		ctx.Status("Starting host...");
+		services.AddSingleton<AppRunner>(runner);
+
+		foreach (var type in runner.GetCommandClassTypes())
 		{
-			x.AddHostedService<IoService>();
-		});
-		
-		host = builder.Build();
+			services.AddScoped(type.type);
+		}
 	});
 
-await host.RunAsync();
+await using var serviceProvider = services.BuildServiceProvider();
+
+runner
+	.UseSpectreAnsiConsole()
+	.UseSpectreArgumentPrompter()
+	.UseErrorHandler((ctx, ex) =>
+	{
+		var console = ctx!.DependencyResolver!.Resolve<IAnsiConsole>()!;
+		console.Write(ex.GetRenderable());
+
+		if(ex is ISupplyExitCode i)
+		{
+			return i.ExitCode + 1;
+		}
+
+		return 1;
+	})
+	.UseTypoSuggestions()
+	.UseResponseFiles()
+	.UseNameCasing(Case.KebabCase)
+	.UseMicrosoftDependencyInjection(
+		serviceProvider,
+		c => c.DependencyResolver!.Resolve<IServiceProvider>()!.CreateScope());
+
+runner.AppSettings.Help.UsageAppNameStyle = UsageAppNameStyle.Adaptive;
+runner.AppSettings.Help.TextStyle = HelpTextStyle.Detailed;
+runner.AppSettings.Help.ExpandArgumentsInUsage = true;
+
+return await runner.RunAsync(args);
