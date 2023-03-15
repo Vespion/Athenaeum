@@ -10,7 +10,7 @@ namespace VespionSoftworks.Athenaeum.Build
 		{
 		}
 
-		public string BuildConfiguration => Arguments.GetArgument("configuration");
+		public string BuildConfiguration => Arguments.GetArgument("configuration") ?? "Debug";
 
 		public string PluginFeed => Arguments.GetArgument("plugin-feed") ?? this.GetLocalNugetFeedPath().FullPath;
 		public string PluginFeedKey => Arguments.GetArgument("plugin-feed-api-kay");

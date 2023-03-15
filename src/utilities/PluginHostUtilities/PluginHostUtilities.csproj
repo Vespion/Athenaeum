@@ -20,9 +20,9 @@
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="7.0.0" />
-      <PackageReference Include="NuGet.PackageManagement" Version="6.5.0" />
       <PackageReference Include="NuGet.Packaging" Version="6.5.0" />
       <PackageReference Include="NuGet.Protocol" Version="6.5.0" />
+      <PackageReference Include="NuGet.Resolver" Version="6.5.0" />
     </ItemGroup>
 
 </Project>

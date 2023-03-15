@@ -61,7 +61,7 @@ public class IoService: BackgroundService
 			_console.WriteLine("Type 'help' for a command list.", new Style(decoration: Decoration.Italic));
 			_console.WriteLine();
 		
-			while (_isRunning)
+			while (_isRunning && !stoppingToken.IsCancellationRequested)
 			{
 				var input = _console.Ask<string>("> ");
 				_logger.LogDebug("Received input: {Input}", input);
@@ -69,8 +69,16 @@ public class IoService: BackgroundService
 			}
 		}
 
-		_logger.LogInformation("Execution loop finished, triggering host shutdown");
-		_appLifetime.StopApplication();
+		if (stoppingToken.IsCancellationRequested)
+		{
+			_logger.LogInformation("Execution loop cancelled");
+		}
+		else
+		{
+			_logger.LogInformation("Execution loop finished, triggering host shutdown");
+			_appLifetime.StopApplication();
+		}
+		
 		return Task.CompletedTask;
 	}
 }

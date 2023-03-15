@@ -34,6 +34,7 @@ AnsiConsole.Status()
 	{
 		//Configure logging and shared services
 		var builder = Host.CreateDefaultBuilder(args)
+			.UseConsoleLifetime()
 			.ConfigureLogging(lb =>
 			{
 				lb.ClearProviders();
@@ -58,21 +59,19 @@ AnsiConsole.Status()
 			using (var pluginProvider = x.BuildServiceProvider())
 			{
 				var logger = pluginProvider.GetRequiredService<ILogger<Program>>();
-				var options = pluginProvider.GetRequiredService<IOptions<PluginConfiguration>>();
-				var resolver = pluginProvider.GetRequiredService<PluginResolutionService>();
-
-				var resolutionTask = resolver.ResolvePluginsAsync();
-				resolutionTask.AsTask().Wait();
-
+				var resolver = pluginProvider.GetRequiredService<IPluginResolutionService>();
+				
 				x.Scan(y =>
 				{
-					var pluginAssemblies = Directory.EnumerateFiles(
-						options.Value.PluginDirectory!,
-						"*.dll",
-						SearchOption.AllDirectories
-					).Select(a =>
+					var pluginProgress = new Progress<string>(s => ctx.Status(s));
+					var resolutionTask = resolver.ResolvePluginsAsync(pluginProgress);
+
+					var pluginAssemblies = resolutionTask
+						.GetAwaiter()
+						.GetResult()
+						.Select(a =>
 						{
-							using (logger.BeginScope(new Dictionary<string, object> { { "AssemblyPath", a } }))
+							using (logger.BeginScope(new Dictionary<string, object> {{ "AssemblyPath", a }}))
 							{
 								try
 								{
@@ -87,17 +86,26 @@ AnsiConsole.Status()
 									return null;
 								}
 							}
-						}
-					).Where(n => n != null).Select(b => b!);
+						})
+						.Where(n => n != null)
+						.Select(b => b!);
 
 
 					y.FromAssemblies(pluginAssemblies)
 						.AddClasses(z =>
 						{
 							z.AssignableTo<IPluginBootstrapper>();
+						})
+						.AsImplementedInterfaces()
+						.WithTransientLifetime()
+						.AddClasses(z =>
+						{
 							z.AssignableTo<IStoragePlugin>();
 							z.AssignableTo<IAuthenticatedStoragePlugin>();
-						});
+						})
+						.AsImplementedInterfaces()
+						.WithScopedLifetime();
+					
 				});
 			}
 

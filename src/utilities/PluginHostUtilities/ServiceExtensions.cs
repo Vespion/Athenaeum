@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NuGet.Common;
-using NuGet.ProjectManagement;
 using VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities.Configuration;
 
 namespace VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities;
@@ -14,8 +13,7 @@ public static class ServiceExtensions
 		services.AddOptions<PluginConfiguration>()
 			.ValidateDataAnnotations();
 
-		services.AddTransient<INuGetProjectContext, ProjectContext>();
-		services.AddTransient<PluginResolutionService>();
+		services.AddTransient<IPluginResolutionService, PluginResolutionService>();
 		services.AddTransient<ILogger, NugetLogger>();
 		
 		return services;
