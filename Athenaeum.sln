@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "src\client
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{15344FF7-C0F2-440C-B1E1-1D676403CCE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "build", "Build\build.csproj", "{9E2541CC-FDF9-4B93-ACC3-3285476B9EB4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginHostUtilities", "src\utilities\PluginHostUtilities\PluginHostUtilities.csproj", "{C63E7A3B-1400-4107-A4E3-301473A4E83F}"
 EndProject
 Global
@@ -62,10 +60,6 @@ Global
 		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E2541CC-FDF9-4B93-ACC3-3285476B9EB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E2541CC-FDF9-4B93-ACC3-3285476B9EB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E2541CC-FDF9-4B93-ACC3-3285476B9EB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E2541CC-FDF9-4B93-ACC3-3285476B9EB4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C63E7A3B-1400-4107-A4E3-301473A4E83F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C63E7A3B-1400-4107-A4E3-301473A4E83F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C63E7A3B-1400-4107-A4E3-301473A4E83F}.Release|Any CPU.ActiveCfg = Release|Any CPU
