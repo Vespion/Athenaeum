@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities.Configuration;
 
-public class PluginConfiguration: IValidatableObject
+[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
+public record PluginConfiguration: IValidatableObject
 {
-	public string PluginDirectory { get; set; }
-	public IReadOnlyList<NuGetFeed> Feeds { get; set; }
-	public IReadOnlyList<NuGetPackage> Plugins { get; set; } = Array.Empty<NuGetPackage>();
+	public string PluginDirectory { get; init; } = null!;
+	public IReadOnlyList<NuGetFeed> Feeds { get; init; } = null!;
+	public IReadOnlyList<NuGetPackage> Plugins { get; init; } = Array.Empty<NuGetPackage>();
 
 	/// <inheritdoc />
 	public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -21,7 +24,7 @@ public class PluginConfiguration: IValidatableObject
 			Directory.CreateDirectory(PluginDirectory);
 		}
 
-		if (Feeds == null || Feeds.Count == 0)
+		if (Feeds is not { Count: not 0 })
 		{
 			failures.Add(new ValidationResult("At least one feed is required", new[] { nameof(Feeds) }));
 		}

@@ -1,14 +1,17 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
 namespace VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities.Configuration;
 
-public class NuGetPackage: IValidatableObject
+[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
+public record NuGetPackage: IValidatableObject
 {
-	public string Name { get; set; }
-	public string Version { get; set; }
-	
+	public string Name { get; init; } = null!;
+	public string Version { get; init; } = null!;
+
 	public static implicit operator PackageIdentity(NuGetPackage pkg)
 	{
 		return new PackageIdentity(pkg.Name, new NuGetVersion(pkg.Version));
