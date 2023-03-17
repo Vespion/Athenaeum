@@ -22,7 +22,7 @@ public sealed class StorageFactory : IStorageFactoryPlugin
 	}
 
 	/// <inheritdoc />
-	public ValueTask<IStoragePlugin> Open(IDictionary<string, string> configuration)
+	public ValueTask<IStoragePlugin> OpenAsync(IDictionary<string, string> configuration)
 	{
 		var path = configuration[PathConfigKey];
 
@@ -33,7 +33,7 @@ public sealed class StorageFactory : IStorageFactoryPlugin
 	}
 
 	/// <inheritdoc />
-	public async ValueTask<(IDictionary<string, string> configuration, IStoragePlugin)> Create()
+	public async ValueTask<(IDictionary<string, string> configuration, IStoragePlugin)> CreateAsync()
 	{
 		var fileLocation = await _prompter.PromptForDirectoryAsync("The directory to store the files in");
 		var config = new Dictionary<string, string>
@@ -41,18 +41,36 @@ public sealed class StorageFactory : IStorageFactoryPlugin
 			{ PathConfigKey, fileLocation }
 		};
 
-		var plugin = await Open(config);
+		var dirInfo = _fileSystem.DirectoryInfo.New(fileLocation);
+		
+		if (dirInfo.Exists)
+		{
+			//Directory already exists, check for files
+			if (dirInfo.EnumerateFiles("", SearchOption.AllDirectories).Any())
+			{
+				var okay = await _prompter.PromptConfirmationAsync("Directory Exists",
+					$"The directory '{fileLocation}' already contains files. Do you want to continue?",
+					true);
+
+				if (!okay)
+				{
+					throw new UnauthorizedAccessException();
+				}
+			}
+		}
+		
+		var plugin = await OpenAsync(config);
 
 		return (config, plugin);
 	}
 
 	/// <inheritdoc />
-	public async ValueTask Delete(IDictionary<string, string> configuration)
+	public async ValueTask DeleteAsync(IDictionary<string, string> configuration)
 	{
-		if (!await _prompter.PromptConfirmationAsync("Delete storage",
-			    "Are you sure you want to delete this storage?",
-			    true)) return;
 		var path = configuration[PathConfigKey];
+		if (!await _prompter.PromptConfirmationAsync("Delete directory",
+			    $"Are you sure you want to delete the directory '{path}'?",
+			    true)) return;
 		_fileSystem.Directory.Delete(path, true);
 	}
 }

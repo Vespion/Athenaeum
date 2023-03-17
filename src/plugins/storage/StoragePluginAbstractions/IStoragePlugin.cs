@@ -10,19 +10,19 @@ public interface IStorageFactoryPlugin
 	/// </summary>
 	/// <param name="configuration">The configuration needed to connect to this storage area</param>
 	/// <returns>The storage plugin</returns>
-	ValueTask<IStoragePlugin> Open(IDictionary<string, string> configuration);
+	ValueTask<IStoragePlugin> OpenAsync(IDictionary<string, string> configuration);
 
 	/// <summary>
 	///     Creates an instance of a storage plugin. This method initialises a new storage area.
 	/// </summary>
 	/// <returns>A tuple containing the storage plugin and the required configuration to open this plugin in the future</returns>
-	ValueTask<(IDictionary<string, string> configuration, IStoragePlugin)> Create();
+	ValueTask<(IDictionary<string, string> configuration, IStoragePlugin)> CreateAsync();
 
 	/// <summary>
 	///     Deletes an existing storage area.
 	/// </summary>
 	/// <param name="configuration">The configuration needed to connect to this storage area</param>
-	ValueTask Delete(IDictionary<string, string> configuration);
+	ValueTask DeleteAsync(IDictionary<string, string> configuration);
 }
 
 /// <summary>
@@ -63,7 +63,7 @@ public interface IStoragePlugin : IDisposable
 	/// <param name="path">The key of the data to retrieve</param>
 	/// <typeparam name="T">The type of the object, must inherit from <see cref="IDataObject" /></typeparam>
 	/// <returns>The resolved object</returns>
-	ValueTask<T> GetAsync<T>(string path) where T : IDataObject;
+	ValueTask<T?> GetAsync<T>(string path) where T : IDataObject;
 
 	/// <summary>
 	///     Saves a data object

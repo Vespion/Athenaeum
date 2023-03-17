@@ -19,7 +19,7 @@ using VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities;
 
 //Render header
 AnsiConsole.Write(
-	new FigletText("Athenaeum")
+	new FigletText(FigletFont.Default, "Athenaeum")
 		.LeftJustified()
 		.Color(Color.Fuchsia)
 );
@@ -27,7 +27,7 @@ var assem = typeof(Program).Assembly;
 var attribs = assem.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), true);
 var copyright = ((AssemblyCopyrightAttribute)attribs[0]).Copyright;
 var assemblyName = assem.GetName();
-AnsiConsole.MarkupLine($"[grey]{copyright} - v{assemblyName.Version}[/]");
+AnsiConsole.MarkupLine($"[purple]{copyright} - v{assemblyName.Version}[/]");
 
 var runner = new AppRunner<Root>();
 IServiceCollection services = new ServiceCollection();
