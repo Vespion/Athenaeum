@@ -54,15 +54,17 @@ public class Misc
 	[Fact]
 	public void ResolvesPath()
 	{
-		var (plugin, _, log) = Helpers.CreatePlugin(_output);
+		var (plugin, fs, log) = Helpers.CreatePlugin(_output);
+
+		var expectedPath = fs.Path.GetFullPath("obj");
 		
 		var path = plugin.ResolveFullPath("obj");
-		path.Should().Be("/obj");
+		path.Should().Be(expectedPath);
 
 		log.RecordedLogs.Should().HaveCount(2);
 		var logs = log.RecordedTraceLogs.ToArray();
 		logs.Should().HaveCount(2);
 		logs[0].Message.Should().Be("Resolving full path for 'obj'");
-		logs[1].Message.Should().Be("Resolved full path for 'obj' to '/obj'");
+		logs[1].Message.Should().Be($"Resolved full path for 'obj' to '{expectedPath}'");
 	}
 }

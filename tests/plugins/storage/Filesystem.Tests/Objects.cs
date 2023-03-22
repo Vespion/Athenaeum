@@ -110,7 +110,7 @@ public class Objects
 		
 		log.RecordedLogs.Should().HaveCount(4);
 		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0, (LogLevel.Debug, null, "Saving object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '/temp/obj'"))
+			.And.HaveElementAt(0, (LogLevel.Debug, null, $"Saving object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '{scratch.FullName}'"))
 			.And.HaveElementAt(1, (LogLevel.Debug, null, "Serializing object"));
 	}
 	
@@ -120,15 +120,15 @@ public class Objects
 		var (plugin, fs, log) = Helpers.CreatePlugin(_output);
 		
 		var dataObject = new TestDataObject(Text);
-		
-		fs.AddFile(Path.Combine(fs.Path.GetTempPath(), "obj"), new MockFileData(JsonSerializer.Serialize(dataObject)));
+		var expectedPath = fs.Path.GetFullPath(Path.Combine(fs.Path.GetTempPath(), "obj"));
+		fs.AddFile(expectedPath, new MockFileData(JsonSerializer.Serialize(dataObject)));
 		
 		var result = await plugin.GetAsync<TestDataObject>(Path.Combine(plugin.ScratchPathPrefix, "obj"));
 		Assert.Equal(Text, result?.Contents);
 		
 		log.RecordedLogs.Should().HaveCount(4);
 		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0, (LogLevel.Debug, null, "Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '/temp/obj'"))
+			.And.HaveElementAt(0, (LogLevel.Debug, null, $"Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '{expectedPath}'"))
 			.And.HaveElementAt(1, (LogLevel.Debug, null, "Deserializing object"));
 	}
 	

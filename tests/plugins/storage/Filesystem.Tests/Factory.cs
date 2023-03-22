@@ -79,7 +79,9 @@ public class Factory
 		var plugin = await fact.OpenAsync(config);
 		plugin.Should().NotBeNull();
 
-		fs.AllDirectories.Should().Contain("/test");
+		var expectedPath = fs.Path.GetFullPath("test");
+		
+		fs.AllDirectories.Should().Contain(expectedPath);
 	}
 	
 	[Fact]
@@ -243,7 +245,7 @@ public class Factory
 		};
 
 		await fact.DeleteAsync(config);
-
-		fs.AllDirectories.Should().Contain("/test");
+		var expectedPath = fs.Path.GetFullPath("test");
+		fs.AllDirectories.Should().Contain(expectedPath);
 	}
 }
