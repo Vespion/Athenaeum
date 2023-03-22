@@ -225,7 +225,8 @@ public class Factory
 		
 		await fact.DeleteAsync(config);
 
-		fs.AllDirectories.Should().NotContain("/test");
+		var expectedPath = fs.Path.GetFullPath("test");
+		fs.AllDirectories.Should().NotContain(expectedPath);
 	}
 	
 	[Fact]

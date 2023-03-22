@@ -3,6 +3,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using VespionSoftworks.Athenaeum.Plugins.Storage.Abstractions;
+using VespionSoftworks.Athenaeum.TestUtilities.Logger;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -38,9 +39,10 @@ public class Objects
 		await plugin.SaveAsync("obj", dataObject, DataCategory.DenseText);
 		
 		log.RecordedLogs.Should().HaveCount(4);
-		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0, (LogLevel.Debug, null, "Saving object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for 'obj'"))
-			.And.HaveElementAt(1, (LogLevel.Debug, null, "Serializing object"));
+		var debug = log.RecordedDebugLogs.ToArray();
+		debug.Should().HaveCount(2);
+		debug[0].Message.Should().Be("Saving object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for 'obj'");
+		debug[1].Message.Should().Be("Serializing object");
 	}
 	
 	[Fact]
@@ -56,9 +58,11 @@ public class Objects
 		Assert.Equal(Text, result?.Contents);
 		
 		log.RecordedLogs.Should().HaveCount(4);
-		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0, (LogLevel.Debug, null, "Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for 'obj'"))
-			.And.HaveElementAt(1, (LogLevel.Debug, null, "Deserializing object"));
+		
+		var debug = log.RecordedDebugLogs.ToArray();
+		debug.Should().HaveCount(2);
+		debug[0].Message.Should().Be("Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for 'obj'");
+		debug[1].Message.Should().Be("Deserializing object");
 	}
 	
 	[Fact]
@@ -85,11 +89,11 @@ public class Objects
 		await t.Should().ThrowAsync<JsonException>();
 		
 		log.RecordedLogs.Should().HaveCount(5);
-		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0,
-				(LogLevel.Debug, null,
-					"Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for 'obj'"))
-			.And.HaveElementAt(1, (LogLevel.Debug, null, "Deserializing object"));
+		var debug = log.RecordedDebugLogs.ToArray();
+		debug.Should().HaveCount(2);
+		debug[0].Message.Should().Be("Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for 'obj'");
+		debug[1].Message.Should().Be("Deserializing object");
+		
 		log.RecordedErrorLogs.Should()
 			.ContainSingle(x =>
 				x.Message ==
@@ -109,9 +113,10 @@ public class Objects
 		Assert.True(scratch.Exists);
 		
 		log.RecordedLogs.Should().HaveCount(4);
-		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0, (LogLevel.Debug, null, $"Saving object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '{scratch.FullName}'"))
-			.And.HaveElementAt(1, (LogLevel.Debug, null, "Serializing object"));
+		var debug = log.RecordedDebugLogs.ToArray();
+		debug.Should().HaveCount(2);
+		debug[0].Message.Should().Be($"Saving object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '{scratch.FullName}'");
+		debug[1].Message.Should().Be("Serializing object");
 	}
 	
 	[Fact]
@@ -127,9 +132,10 @@ public class Objects
 		Assert.Equal(Text, result?.Contents);
 		
 		log.RecordedLogs.Should().HaveCount(4);
-		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0, (LogLevel.Debug, null, $"Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '{expectedPath}'"))
-			.And.HaveElementAt(1, (LogLevel.Debug, null, "Deserializing object"));
+		var debug = log.RecordedDebugLogs.ToArray();
+		debug.Should().HaveCount(2);
+		debug[0].Message.Should().Be($"Loading object (VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests.TestDataObject) for '{expectedPath}'");
+		debug[1].Message.Should().Be("Deserializing object");
 	}
 	
 	[Fact]

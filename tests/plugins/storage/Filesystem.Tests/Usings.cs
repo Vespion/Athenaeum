@@ -1,6 +1,7 @@
 using System.IO.Abstractions.TestingHelpers;
-using InMemLogger;
 using Microsoft.Extensions.Logging;
+using VespionSoftworks.Athenaeum.TestUtilities.Logger;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests;
@@ -9,17 +10,20 @@ public static class Helpers
 {
 	public static (StoragePlugin, MockFileSystem, InMemoryLogger) CreatePlugin(ITestOutputHelper? output = null, MockFileSystem? fs = null)
 	{
-		var logger = new InMemoryLogger();
-
+		var provider = new InMemoryLoggerProvider();
 		var lb = new LoggerFactory();
-		lb.AddProvider(new InMemLoggerProvider(logger));
-
+		lb.AddProvider(provider);
+		
 		if (output != null)
 		{
 			lb.AddXUnit(output);
 		}
-		
+
 		fs ??= new MockFileSystem();
-		return (new StoragePlugin(fs.DirectoryInfo.New("/"), lb.CreateLogger<StoragePlugin>()), fs, logger);
+		var plugin = new StoragePlugin(fs.DirectoryInfo.New("/"), lb.CreateLogger<StoragePlugin>());
+		
+		var logger = Assert.Single(provider.Loggers.Values);
+		Assert.Equal("VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.StoragePlugin", logger.Name);
+		return (plugin, fs, logger);
 	}
 }

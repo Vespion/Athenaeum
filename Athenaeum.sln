@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginHostUtilities", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filesystem.Tests", "tests\plugins\storage\Filesystem.Tests\Filesystem.Tests.csproj", "{B61F0092-8412-4675-B88F-C1FF332359D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUtilities", "tests\TestUtilities\TestUtilities.csproj", "{70F6DAFD-AA2F-4EB1-B090-613A8CF3D08A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,7 @@ Global
 		{9F90DB03-71C3-41DB-84AB-CFFBBB9A880D} = {711301DC-9F50-4C85-AAAE-8ED37ED57EF6}
 		{C63E7A3B-1400-4107-A4E3-301473A4E83F} = {15344FF7-C0F2-440C-B1E1-1D676403CCE1}
 		{B61F0092-8412-4675-B88F-C1FF332359D5} = {5FF9D66F-CD20-410D-AF44-13C35E33C487}
+		{70F6DAFD-AA2F-4EB1-B090-613A8CF3D08A} = {15344FF7-C0F2-440C-B1E1-1D676403CCE1}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{02A0F747-1C4D-4816-AC53-0D84933CA237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -71,5 +74,9 @@ Global
 		{B61F0092-8412-4675-B88F-C1FF332359D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B61F0092-8412-4675-B88F-C1FF332359D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B61F0092-8412-4675-B88F-C1FF332359D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70F6DAFD-AA2F-4EB1-B090-613A8CF3D08A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70F6DAFD-AA2F-4EB1-B090-613A8CF3D08A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70F6DAFD-AA2F-4EB1-B090-613A8CF3D08A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70F6DAFD-AA2F-4EB1-B090-613A8CF3D08A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

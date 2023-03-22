@@ -2,12 +2,28 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests;
 
 public class Bootstrapper
 {
+	[Fact]
+	public void LocalisationPathCorrect()
+	{
+		var serviceCollection = new ServiceCollection();
+
+		var boot = new Plugins.Storage.Filesystem.Bootstrapper();
+		
+		boot.ConfigureServices(serviceCollection);
+		
+		var options = serviceCollection.BuildServiceProvider().GetRequiredService<IOptions<LocalizationOptions>>();
+
+		options.Value.ResourcesPath.Should().Be("Resources");
+	}
+	
 	[Fact]
 	public void AddsExpectedService()
 	{

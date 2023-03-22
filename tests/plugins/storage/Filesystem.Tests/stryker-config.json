@@ -1,6 +1,6 @@
 {
   "stryker-config":
   {
-    "project": "Filesystem.csproj"
+    "project": "FilesystemStorage.csproj"
   }
 }

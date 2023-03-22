@@ -2,6 +2,7 @@ using System.IO.Abstractions.TestingHelpers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using VespionSoftworks.Athenaeum.Plugins.Storage.Abstractions;
+using VespionSoftworks.Athenaeum.TestUtilities.Logger;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,9 +36,10 @@ public class BinaryStreams
 		fs.FileExists("stream").Should().BeTrue();
 		
 		log.RecordedLogs.Should().HaveCount(4);
-		log.RecordedDebugLogs.Should().HaveCount(2)
-			.And.HaveElementAt(0, (LogLevel.Debug, null, "Saving binary stream for 'stream'"))
-			.And.HaveElementAt(1, (LogLevel.Debug, null, "Writing stream to file"));
+		var debug = log.RecordedDebugLogs.ToArray();
+		debug.Should().HaveCount(2);
+		debug[0].Message.Should().Be("Saving binary stream for 'stream'");
+		debug[1].Message.Should().Be("Writing stream to file");
 	}
 	
 	[Fact]
