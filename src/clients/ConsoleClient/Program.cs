@@ -76,6 +76,11 @@ AnsiConsole.Status()
 			});
 		});
 
+		services.AddLocalization(options =>
+		{
+			options.ResourcesPath = "Resources";
+		});
+		
 		services.AddPluginServices(configuration);
 		services.AddSingleton(AnsiConsole.Console);
 

@@ -12,5 +12,9 @@ public sealed class Bootstrapper : IPluginBootstrapper
 	public void ConfigureServices(IServiceCollection service)
 	{
 		service.TryAddSingleton<IFileSystem, FileSystem>();
+		service.AddLocalization(options =>
+		{
+			options.ResourcesPath = "Resources";
+		});
 	}
 }

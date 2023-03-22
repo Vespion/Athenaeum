@@ -98,7 +98,7 @@ public class Factory
 		
 		var fact = new StorageFactory(prompter, fs, _output.ToLogger<StoragePlugin>());
 
-		prompter.PromptsRequested += (sender, prompts) =>
+		prompter.PromptsRequested += (_, prompts) =>
 		{
 			prompts.Should()
 				.ContainSingle(p =>
@@ -158,7 +158,7 @@ public class Factory
 		
 		
 		var prompterCalled = false;
-		prompter.ConfirmationRequested += (sender, args) =>
+		prompter.ConfirmationRequested += (_, args) =>
 		{
 			args.title.Should().Be("Directory Exists");
 			args.message.Should().Be("The directory 'test' already contains files. Do you want to continue?");
@@ -214,7 +214,7 @@ public class Factory
 			{ "path", "test" }
 		};
 
-		prompter.ConfirmationRequested += (sender, args) =>
+		prompter.ConfirmationRequested += (_, args) =>
 		{
 			args.title.Should().Be("Delete directory");
 			args.message.Should().Be("Are you sure you want to delete the directory 'test'?");

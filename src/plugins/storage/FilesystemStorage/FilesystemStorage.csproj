@@ -11,7 +11,10 @@
         <RepositoryType>git</RepositoryType>
         <Title>Athenaeum Filesystem Storage</Title>
         <Description>Allows the use of local filesystems for storage</Description>
-        <PackageTags>Athenaeum</PackageTags>
+        <PackageTags>athenaeum;plugin;storage;local</PackageTags>
+        <NeutralLanguage>en-GB</NeutralLanguage>
+        <Company>Vespion Softworks</Company>
+        <Product>Athenaeum</Product>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -30,12 +33,28 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.4" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0">
             <!-- A logging implementation will be provided by all hosts -->
             <ExcludeAssets>runtime</ExcludeAssets>
         </PackageReference>
         <PackageReference Include="TestableIO.System.IO.Abstractions" Version="19.2.4" />
         <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\StoragePlugin.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>StoragePlugin.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources\StoragePlugin.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Strings.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

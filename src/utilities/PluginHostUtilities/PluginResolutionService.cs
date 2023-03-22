@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.Versioning;
+using FluentScanning;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NuGet.Configuration;
@@ -10,13 +11,15 @@ using NuGet.Packaging.Signing;
 using NuGet.Protocol.Core.Types;
 using NuGet.Resolver;
 using NuGet.Versioning;
+using VespionSoftworks.Athenaeum.Plugins.Abstractions;
+using VespionSoftworks.Athenaeum.Plugins.Storage.Abstractions;
 using VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities.Configuration;
 
 namespace VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities;
 
 public interface IPluginResolutionService
 {
-	Task<IEnumerable<string>> ResolvePluginsAsync(IProgress<string> progress);
+	IAsyncEnumerable<PluginPackage> ResolvePluginsAsync(IProgress<string> progress);
 }
 
 public class PluginResolutionService: IPluginResolutionService
@@ -34,14 +37,17 @@ public class PluginResolutionService: IPluginResolutionService
 
 	private ISettings GetSettingsFromPluginConfig()
 	{
-		_logger.LogDebug("Loading default settings with no root");
-		var settings = Settings.LoadDefaultSettings(null);
+		var settingsFilePath = Path.GetTempFileName();
+		_logger.LogDebug("Generating temporary empty settings @ '{Path}'", settingsFilePath);
 
-		// foreach (var feed in _options.Value.Feeds)
-		// {
-		// 	settings.AddOrUpdate("packageSources", new ClearItem());
-		// 	settings.AddOrUpdate("packageSources", new AddItem(feed.Name, feed.Url));
-		// }
+
+		//Write out a basic settings file, it's annoying to have to do this but it's the only way to get the settings to load
+		File.WriteAllText(settingsFilePath, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  
+</configuration>");
+		
+		var settings = Settings.LoadDefaultSettings(Path.GetDirectoryName(settingsFilePath), Path.GetFileName(settingsFilePath), null);
 		
 		return settings;
 	}
@@ -123,7 +129,7 @@ public class PluginResolutionService: IPluginResolutionService
 	}
 	
 	/// <inheritdoc />
-	public async Task<IEnumerable<string>> ResolvePluginsAsync(IProgress<string> progress)
+	public async IAsyncEnumerable<PluginPackage> ResolvePluginsAsync(IProgress<string> progress)
 	{
 		progress.Report("Loading NuGet...");
 		var settings = GetSettingsFromPluginConfig();
@@ -155,10 +161,9 @@ public class PluginResolutionService: IPluginResolutionService
 			_nugetLogger
 		);
 		
-		var assemblyList = new List<string>();
-		
 		foreach (var plugin in _options.Value.Plugins)
 		{
+
 			progress.Report($"Resolving plugin {plugin.Name}...");
 			var resolvedPackages = await ResolvePlugin(plugin, cacheContext, sourceRepositoryProvider, nuGetFramework);
 			progress.Report($"Resolving dependencies for plugin {plugin.Name}...");
@@ -188,10 +193,21 @@ public class PluginResolutionService: IPluginResolutionService
 				{
 					packageReader = new PackageFolderReader(installedPath);
 				}
+
+				var tags = packageReader.NuspecReader.GetTags().ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+				if (!(tags.Contains("athenaeum") && tags.Contains("plugin")))
+				{
+					continue;
+				}
+
+				var header = new PluginHeader(package.Version, await packageReader.GetPrimarySignatureAsync(default));
 				
 				progress.Report($"Resolving assembly for {package.Id}...");
+				var pluginPackage = new PluginPackage(
+					header
+				);
 
-				IEnumerable<string> GetAssemblies(IReadOnlyCollection<FrameworkSpecificGroup> frameworkSpecificGroups)
+				IEnumerable<string> GetItems(IReadOnlyCollection<FrameworkSpecificGroup> frameworkSpecificGroups, string ext = ".dll")
 				{
 					var nearest = frameworkReducer.GetNearest(nuGetFramework,
 						frameworkSpecificGroups.Select(x => x.TargetFramework));
@@ -202,7 +218,7 @@ public class PluginResolutionService: IPluginResolutionService
 						{
 							foreach (var item in frameworkSpecificGroup.Items)
 							{
-								if (Path.GetExtension(item).ToLower() == ".dll")
+								if (Path.GetExtension(item).ToLower() == ext)
 								{
 									yield return Path.Combine(_options.Value.PluginDirectory, $"{package.Id}.{package.Version}", item);
 								}
@@ -210,15 +226,73 @@ public class PluginResolutionService: IPluginResolutionService
 						}
 					}
 				}
+
+				void ScanForPlugins(IEnumerable<string> assemblyPaths)
+				{
+					var assemblies = assemblyPaths
+						.Select(s =>
+						{
+							Assembly Func() => Assembly.LoadFrom(s);
+							return (AssemblyProvider) (Func<Assembly>)Func;
+						})
+						.ToArray();
+					
+					var scanner = new AssemblyScanner(assemblies);
+
+					var bootstraps = scanner.ScanForTypesThat()
+						.AreAssignableTo<IPluginBootstrapper>()
+						.AreClasses()
+						.ToArray();
+					
+					var storage = new List<Type>(
+						scanner.ScanForTypesThat()
+							.AreAssignableTo<IStoragePlugin>()
+							.AreClasses()
+							.ToArray()
+					);
+					
+					storage.AddRange(
+						scanner.ScanForTypesThat()
+							.AreAssignableTo<IAuthenticatedStoragePlugin>()
+							.AreClasses()
+							.ToArray()
+					);
+
+					var storageFactory = scanner.ScanForTypesThat()
+						.AreAssignableTo<IStorageFactoryPlugin>()
+						.AreClasses()
+						.ToArray();
+
+					pluginPackage.Bootstrappers = bootstraps;
+					pluginPackage.StoragePlugins = storage;
+					pluginPackage.StorageFactoryPlugins = storageFactory;
+
+					 var infoProvider = scanner.ScanForTypesThat()
+						.AreAssignableTo<IPluginInfoProvider>()
+						.ToArray();
+					 
+					 if (infoProvider == default || infoProvider.Length == 0)
+					 {
+						 throw new InvalidProgramException("No info provider found");
+					 }
+					 
+					 pluginPackage.InfoProvider = infoProvider[0];
+				}
 				
 				var libItems = packageReader.GetLibItems().ToArray();
-				assemblyList.AddRange(GetAssemblies(libItems));
-				
 				var frameworkItems = packageReader.GetFrameworkItems().ToArray();
-				assemblyList.AddRange(GetAssemblies(frameworkItems));
+
+				try
+				{
+					ScanForPlugins(GetItems(libItems).Concat(GetItems(frameworkItems)));
+				}
+				catch (InvalidProgramException ex) when(ex.Message == "No info provider found")
+				{
+					//This is an invalid plugin but we can still continue loading others
+					continue;
+				}
+				yield return pluginPackage;
 			}
 		}
-
-		return assemblyList;
 	}
 }

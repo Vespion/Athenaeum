@@ -1,8 +1,6 @@
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using VespionSoftworks.Athenaeum.Plugins.Abstractions;
 using VespionSoftworks.Athenaeum.Plugins.Storage.Abstractions;
 using VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities.Configuration;
@@ -17,8 +15,9 @@ public static class ServiceExtensions
 		services.AddOptions<PluginConfiguration>()
 			.ValidateDataAnnotations();
 
-		services.AddTransient<IPluginResolutionService, PluginResolutionService>();
-		services.AddTransient<NuGet.Common.ILogger, NugetLogger>();
+		services.TryAddTransient<IPluginResolutionService, PluginResolutionService>();
+		services.TryAddTransient<NuGet.Common.ILogger, NugetLogger>();
+		services.TryAddScoped<IPluginPackageAccessor, PluginPackageAccessor>();
 		
 		return services;
 	}
@@ -41,55 +40,34 @@ public static class ServiceExtensions
 	{
 		using (var pluginProvider = x.BuildServiceProvider())
 		{
-			var logger = pluginProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(ServiceExtensions));
 			var resolver = pluginProvider.GetRequiredService<IPluginResolutionService>();
-        				
-			x.Scan(y =>
+        			
+			var pluginProgress = new Progress<string>(s => progress?.Report(s));
+			var packages = resolver.ResolvePluginsAsync(pluginProgress).ToBlockingEnumerable();
+				
+			foreach (var pluginPackage in packages)
 			{
-				var pluginProgress = new Progress<string>(s => progress?.Report(s));
-				var resolutionTask = resolver.ResolvePluginsAsync(pluginProgress);
-        
-				var pluginAssemblies = resolutionTask
-					.GetAwaiter()
-					.GetResult()
-					.Select(a =>
+				foreach (var storagePlugin in pluginPackage.StoragePlugins)
+				{
+					x.AddScoped(typeof(IStoragePlugin), storagePlugin);
+					// ReSharper disable once SuspiciousTypeConversion.Global
+					if (storagePlugin is IAuthenticatedStoragePlugin)
 					{
-						using (logger.BeginScope(new Dictionary<string, object> {{ "AssemblyPath", a }}))
-						{
-							try
-							{
-								logger.LogDebug("Loading assembly @ {AssemblyPath}", a);
-								return Assembly.LoadFrom(a);
-							}
-							catch (FileLoadException ex)
-							{
-								logger.LogDebug(ex,
-									"Failed to load assembly @ {AssemblyPath}, assembly will be excluded from scan",
-									a);
-								return null;
-							}
-						}
-					})
-					.Where(n => n != null)
-					.Select(b => b!);
-        
-        
-				y.FromAssemblies(pluginAssemblies)
-					.AddClasses(z =>
-					{
-						z.AssignableTo<IPluginBootstrapper>();
-					})
-					.AsImplementedInterfaces()
-					.WithTransientLifetime()
-					.AddClasses(z =>
-					{
-						z.AssignableTo<IStoragePlugin>();
-						z.AssignableTo<IAuthenticatedStoragePlugin>();
-					})
-					.AsImplementedInterfaces()
-					.WithScopedLifetime();
-        					
-			});
+						x.AddScoped(typeof(IAuthenticatedStoragePlugin), storagePlugin);
+
+					}
+				}
+				
+				foreach (var bootstrapper in pluginPackage.Bootstrappers)
+				{
+					x.AddTransient(typeof(IStorageFactoryPlugin), bootstrapper);
+				}
+
+				x.AddScoped(typeof(IPluginInfoProvider), pluginPackage.InfoProvider)
+					.AddScoped(pluginPackage.InfoProvider);
+				
+				x.AddSingleton(pluginPackage);
+			}
 		}
 
 		return x;

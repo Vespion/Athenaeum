@@ -12,11 +12,9 @@ public class Root
 {
 	private static bool RunInteractive { get; set; }
 	
-	// [Command(Description = "Shows help information")]
-	// public void Help(CommandContext context)
-	// {
-	// 	context.PrintHelp();
-	// }
+	[PublicAPI]
+	[Subcommand]
+	public Plugin Plugin { get; set; } = null!;
 	
 	[PublicAPI]
 	[Command(Description = "Starts interactive mode")]
