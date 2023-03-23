@@ -8,13 +8,19 @@
         <RootNamespace>VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem</RootNamespace>
         <Authors>Vespion</Authors>
         <Copyright>Vespion Softworks</Copyright>
-        <RepositoryType>git</RepositoryType>
         <Title>Athenaeum Filesystem Storage</Title>
         <Description>Allows the use of local filesystems for storage</Description>
         <PackageTags>athenaeum;plugin;storage;local</PackageTags>
         <NeutralLanguage>en-GB</NeutralLanguage>
         <Company>Vespion Softworks</Company>
         <Product>Athenaeum</Product>
+        <!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -33,6 +39,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
         <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.4" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0">
             <!-- A logging implementation will be provided by all hosts -->

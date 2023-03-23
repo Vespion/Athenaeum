@@ -8,13 +8,20 @@
         <RootNamespace>VespionSoftworks.Athenaeum.Utilities.PluginHostUtilities</RootNamespace>
         <Authors>Vespion</Authors>
         <Copyright>Vespion Softworks</Copyright>
-        <RepositoryType>git</RepositoryType>
         <Title>Athenaeum Plugin Host Utlities</Title>
         <Description>Utility types and services for Athenaeum plugin hosts/clients</Description>
         <PackageTags>Athenaeum</PackageTags>
+        <!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
       <PackageReference Include="FluentScanning" Version="2.0.1" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
