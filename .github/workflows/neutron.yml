@@ -16,30 +16,18 @@ jobs:
   ci:
     name: Continuous Integration
     runs-on: ubuntu-latest
-    if: always() # Always run this job, ignoring the windows results
     permissions:
       checks: write
-      # needed unless run with comment_mode: off
       pull-requests: write
-      # only needed for private repository
       contents: read
-      # only needed for private repository
       issues: read
-      # required by download step to access artifacts API
       actions: read
     steps:
       - uses: actions/checkout@v3
         name: Checkout
         with:
-            fetch-depth: 0 # Get the full history so that versioning works
+          fetch-depth: 0 # Get the full history so that versioning works
 
-      - name: Upload Event File
-        uses: actions/upload-artifact@v3
-        with:
-            retention-days: 1
-            name: Event File
-            path: ${{ github.event_path }}
-      
       - name: Cache NuGet
         uses: actions/cache@v3
         with:
@@ -56,11 +44,11 @@ jobs:
           path: |
             .nuke/temp
           key: nuke
-          
+
       - uses: nrwl/nx-set-shas@v3
         id: last_successful_commit
         name: Find affected commit range
-          
+
       - name: Run 'Publish' target
         run: ./build.sh Publish --build-changed
         env:
@@ -68,7 +56,7 @@ jobs:
           To: ${{ steps.last_successful_commit.outputs.head }}
           From: ${{ steps.last_successful_commit.outputs.base }}
           CoverageThreshold: 0
-          
+
       - uses: actions/upload-artifact@v3
         if: always() # Always upload the test results, even if the tests fail
         name: Upload test results
@@ -81,7 +69,7 @@ jobs:
         if: always() # Always upload the test results, even if the tests fail
         with:
           commit: ${{ github.event.workflow_run.head_sha }}
-          event_file: artifacts/Event File/event.json
+          event_file: ${{ github.event_path }}
           event_name: ${{ github.event.workflow_run.event }}
           files: "artifacts/test_results/**/TestResults.xml"
 
