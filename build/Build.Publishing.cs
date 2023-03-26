@@ -17,8 +17,14 @@ partial class Build
 		.Description("Publishes changed projects")
 		.Executes(() =>
 		{
-            PublishNugetPackages();
+			if (PublishNugetPackages)
+			{
+				PublishToNugetFeed();
+			}
 		});
+	
+	[Parameter("Publish NuGet packages")]
+	readonly bool PublishNugetPackages = IsServerBuild;
 	
 	[Parameter("NuGet API Key for publishing packages")]
 	[Secret]
@@ -34,7 +40,7 @@ partial class Build
 	[Parameter("NuGet symbols feed URL for publishing packages")]
 	readonly string? NugetSymbolsFeed;
 	
-	void PublishNugetPackages()
+	void PublishToNugetFeed()
 	{
 		var packages = GlobFiles(PackagesDirectory, "*.nupkg");
 

@@ -128,10 +128,11 @@ bld/
 [Ll]ogs/
 **/Generated.Build.props
 
-# Build system dotnet-affected
+# Build system
 affected.proj
 /obj
 packages.lock.json
+.nuke/temp
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

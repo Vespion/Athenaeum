@@ -30,6 +30,10 @@
           "type": "integer",
           "description": "The threshold for code coverage"
         },
+        "From": {
+          "type": "string",
+          "description": "When building changed projects, the branch/commit to compare against"
+        },
         "Help": {
           "type": "boolean",
           "description": "Shows the help text for this build assembly"
@@ -100,6 +104,10 @@
             "type": "string"
           }
         },
+        "PublishNugetPackages": {
+          "type": "boolean",
+          "description": "Publish NuGet packages"
+        },
         "Root": {
           "type": "string",
           "description": "Root directory during build execution"
@@ -152,6 +160,10 @@
         "TestTimeout": {
           "type": "integer",
           "description": "The timeout for running tests in minutes"
+        },
+        "To": {
+          "type": "string",
+          "description": "When building changed projects, the branch/commit to compare to"
         },
         "Verbosity": {
           "type": "string",

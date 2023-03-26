@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Build.Evaluation;
 using Nuke.Common;
 using Nuke.Common.ProjectModel;
@@ -18,6 +19,12 @@ partial class Build
     
     [Parameter("Build changed projects")]
     readonly bool BuildChanged;
+
+    [Parameter("When building changed projects, the branch/commit to compare against")]
+    readonly string? From;
+    
+    [Parameter("When building changed projects, the branch/commit to compare to")]
+    readonly string? To;
     
     [PackageExecutable(
         packageId: "dotnet-affected",
@@ -69,9 +76,32 @@ partial class Build
                 }
                 
                 Log.Information("Changed projects selected for build");
-                
-                DotnetAffected($"--solution-path {Solution.Path} -v -f traversal --output-dir {RootDirectory}");
-                
+
+                try
+                {
+                    var sb = new StringBuilder("--solution-path ")
+                        .Append(Solution.Path)
+                        .Append(" -v -f traversal --output-dir ")
+                        .Append(RootDirectory);
+
+                    if (!string.IsNullOrWhiteSpace(From))
+                    {
+                        sb.Append(" --from ").Append(From);
+                    }
+                    
+                    if (!string.IsNullOrWhiteSpace(To))
+                    {
+                        sb.Append(" --to ").Append(To);
+                    }
+
+                    DotnetAffected(sb.ToString());
+                }
+                catch (ProcessException ex) when (ex.ExitCode == 166)
+                {
+                    //No affected projects
+                    Assert.Fail("No projects have changed, breaking out of build", ex);
+                }
+
                 var traversalProject = ProjectModelTasks.ParseProject(TraversalProject);
                 var buildProj = traversalProject.GetItems("ProjectReference")
                     .FirstOrDefault(x => x.EvaluatedInclude.EndsWith("_build.csproj"));

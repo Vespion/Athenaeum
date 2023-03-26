@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ci" />
     <None Include="..\artifacts\**\*">
       <Link>artifacts\%(RecursiveDir)/%(FileName)%(Extension)</Link>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
