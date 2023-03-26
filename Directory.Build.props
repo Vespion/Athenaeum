@@ -4,4 +4,20 @@
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <!-- Packages have to declare themselves as packable manually -->
+        <IsPackable>false</IsPackable>
+        <Deterministic>true</Deterministic>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    </PropertyGroup>
+    
+    <Import Project="$(MSBuildProjectDirectory)\obj\Generated.Build.g.props" Condition="Exists('$(MSBuildProjectDirectory)\obj\Generated.Build.g.props')" />
+
+
+    <Target Name="VersionReport" BeforeTargets="GetAssemblyVersion;GenerateNuspec;GetPackageContents">
+        <Message Importance="normal" Text="Version Information for: $(MSBuildProjectDirectory)
+Version Prefix: $(VersionPrefix)
+Version Suffix: $(VersionSuffix)" />
+    </Target>
 </Project>

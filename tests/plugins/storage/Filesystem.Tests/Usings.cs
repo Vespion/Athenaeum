@@ -1,9 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions.TestingHelpers;
 using Microsoft.Extensions.Logging;
 using VespionSoftworks.Athenaeum.TestUtilities.Logger;
 using Xunit;
 using Xunit.Abstractions;
-
+[assembly: ExcludeFromCodeCoverage]
 namespace VespionSoftworks.Athenaeum.Plugins.Storage.Filesystem.Tests;
 
 public static class Helpers

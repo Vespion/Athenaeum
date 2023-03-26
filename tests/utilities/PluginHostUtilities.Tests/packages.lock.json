@@ -8,6 +8,12 @@
         "resolved": "3.1.2",
         "contentHash": "wuLDIDKD5XMt0A7lE31JPenT7QQwZPFkP5rRpdJeblyXZ9MGLI8rYjvm5fvAKln+2/X+4IxxQDxBtwdrqKNLZw=="
       },
+      "coverlet.msbuild": {
+        "type": "Direct",
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "lu/eJJpqJb4qy3BGPtDD/LI5RSOwXYYyRErTyaG0OTP69llzVK3FEe74hBQx0JtLUTLEVBfERV4uGYcE1Br2sg=="
+      },
       "FluentAssertions": {
         "type": "Direct",
         "requested": "[6.10.0, )",
@@ -43,6 +49,12 @@
         "requested": "[2.4.5, )",
         "resolved": "2.4.5",
         "contentHash": "OwHamvBdUKgqsXfBzWiCW/O98BTx81UKzx2bieIOQI7CZFE5NEQZGi8PBQGIKawDW96xeRffiNf20SjfC0x9hw=="
+      },
+      "XunitXml.TestLogger": {
+        "type": "Direct",
+        "requested": "[3.0.78, )",
+        "resolved": "3.0.78",
+        "contentHash": "3PgUzqy+sF5173JZyWiwx6v49SxqfeybbivGgElzCV1HszrBDDakud9pxuPxX87ThfFK/X+4tQ5YRxkegdI2MQ=="
       },
       "FluentScanning": {
         "type": "Transitive",

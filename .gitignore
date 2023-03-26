@@ -126,6 +126,12 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+**/Generated.Build.props
+
+# Build system dotnet-affected
+affected.proj
+/obj
+packages.lock.json
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
