@@ -37,7 +37,8 @@ partial class Build
 			var testProjects = traversalProject.GetItems("ProjectReference")
 				.Where(x => x.EvaluatedInclude.EndsWith(".Tests.csproj"))
 				.Select(x => x.EvaluatedInclude)
-				.Select(Solution.GetProject);
+				.Select(Solution.GetProject)
+				.ToArray();
 
 			DotNetTest(c => c
 				.EnableNoBuild()
@@ -49,13 +50,31 @@ partial class Build
 				.SetProperty("SkipAutoProps", "true")
 				.SetProperty("DeterministicReport", "true")
 				.SetProperty("Threshold", CoverageThreshold)
-				.CombineWith(testProjects, (_, p) => _
+				.CombineWith(testProjects[..^1], (_, p) => _
 					.SetProjectFile(p)
 					.SetResultsDirectory(TestResultsDirectory / p.Name)
 					.SetCoverletOutput(TestResultsDirectory / "coverage.json")
 					.SetProperty("MergeWith", TestResultsDirectory / "coverage.json")
-				)
+				), 1, //This cannot run in parallel because it would overwrite the coverage file
+				true
 			);
+			
+			DotNetTest(c => c
+				.EnableNoBuild()
+				.SetBlameHangTimeout($"{TestTimeout}m")
+				.EnableCollectCoverage()
+				.SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+				.AddLoggers("xunit")
+				.SetProperty("Exclude", "[xunit.*]*")
+				.SetProperty("SkipAutoProps", "true")
+				.SetProperty("DeterministicReport", "true")
+				.SetProperty("Threshold", CoverageThreshold)
+				.SetProjectFile(testProjects[^1])
+				.SetResultsDirectory(TestResultsDirectory / testProjects[^1].Name)
+				.SetCoverletOutput(TestResultsDirectory / "coverage.xml")
+				.SetProperty("MergeWith", TestResultsDirectory / "coverage.json")
+			);
+			
 			foreach (var testProject in testProjects)
 			{
 				var resultsDirectory = TestResultsDirectory / testProject.Name;
