@@ -37,7 +37,7 @@ jobs:
           key: nuke
       
       - name: Run 'Test' target
-        run: ./build.cmd Test
+        run: ./build.cmd Test --build-changed
       
       - uses: actions/upload-artifact@v3
         name: Upload test results
@@ -132,7 +132,7 @@ jobs:
         name: Find affected commit range
           
       - name: Run 'Publish' target
-        run: ./build.cmd Publish
+        run: ./build.cmd Publish --build-changed
         env:
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           To: ${{ steps.last_successful_commit.outputs.head }}
