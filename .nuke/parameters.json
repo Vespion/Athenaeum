@@ -1,4 +1,5 @@
 {
   "$schema": "./build.schema.json",
-  "Solution": "Athenaeum.sln"
+  "Solution": "Athenaeum.sln",
+  "Verbosity": "Verbose"
 }
