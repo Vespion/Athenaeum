@@ -35,9 +35,18 @@ jobs:
           path: |
             .nuke/temp
           key: nuke
-      
+
+      - uses: nrwl/nx-set-shas@v3
+        if: github.event_name != 'pull_request'
+        id: last_successful_commit
+        name: Find affected commit range
+
       - name: Run 'Test' target
-        run: ./build.cmd Test --build-changed
+        run: ./build.cmd Publish --build-changed
+        env:
+          To: ${{ steps.last_successful_commit.outputs.head }}
+          From: ${{ steps.last_successful_commit.outputs.base }}
+          CoverageThreshold: 0
       
       - uses: actions/upload-artifact@v3
         name: Upload test results
@@ -132,7 +141,7 @@ jobs:
         name: Find affected commit range
           
       - name: Run 'Publish' target
-        run: ./build.cmd Publish --build-changed
+        run: ./build.sh Publish --build-changed
         env:
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           To: ${{ steps.last_successful_commit.outputs.head }}
