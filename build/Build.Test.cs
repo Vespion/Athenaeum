@@ -80,7 +80,7 @@ partial class Build
 				var resultsDirectory = TestResultsDirectory / testProject.Name;
 				
 				Stryker(
-					$"-O {resultsDirectory} -r Json -r Html -r Progress -b {MutationThreshold}",
+					$"-O {resultsDirectory} -r Json -r Html -r Progress -b {MutationThreshold} --target-framework net7.0",
 					testProject.Directory,
 					timeout: (int?)TimeSpan.FromMinutes(MutationTestTimeout).TotalMilliseconds
 				);
