@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: neutron-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   win-test:
     name: Continuous Integration (Windows)
@@ -37,7 +41,6 @@ jobs:
           key: nuke
 
       - uses: nrwl/nx-set-shas@v3
-        if: github.event_name != 'pull_request'
         id: last_successful_commit
         name: Find affected commit range
 
@@ -136,7 +139,6 @@ jobs:
           key: nuke
           
       - uses: nrwl/nx-set-shas@v3
-        if: github.event_name != 'pull_request'
         id: last_successful_commit
         name: Find affected commit range
           
