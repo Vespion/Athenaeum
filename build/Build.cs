@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
@@ -9,6 +10,8 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
+using Octokit;
+using Octokit.Internal;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -25,7 +28,7 @@ partial class Build : NukeBuild
 
     public static int Main () => Execute<Build>(x => x.Compile);
 
-    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
+    [Nuke.Common.Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Solution(GenerateProjects = true)]
@@ -39,6 +42,18 @@ partial class Build : NukeBuild
     static readonly AbsolutePath TestResultsDirectory = ArtifactsDirectory / "test_results";
     static readonly AbsolutePath TraversalProject = RootDirectory / "affected.proj";
 
+    static readonly GitHubActions GitHubActions = GitHubActions.Instance;
+
+    readonly Lazy<IApiConnection> GitHubApiConnection = new(() =>
+    {
+        var product = new ProductHeaderValue("Athenaeum Nuke Build", "1.0.0");
+
+        var credentials = new Credentials(GitHubActions.Token);
+
+        var connection = new Connection(product, new InMemoryCredentialStore(credentials));
+        return new ApiConnection(connection);
+    });
+    
     [PublicAPI]
     Target Clean => _ => _
         .Before(ResolveProjects)

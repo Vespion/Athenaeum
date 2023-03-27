@@ -52,10 +52,10 @@ jobs:
       - name: Run 'Publish' target
         run: ./build.sh Publish --build-changed
         env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           To: ${{ steps.last_successful_commit.outputs.head }}
           From: ${{ steps.last_successful_commit.outputs.base }}
-          CoverageThreshold: 0
 
       - uses: actions/upload-artifact@v3
         if: always() # Always upload the test results, even if the tests fail
