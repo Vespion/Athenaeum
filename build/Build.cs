@@ -46,7 +46,7 @@ partial class Build : NukeBuild
 
     readonly Lazy<IApiConnection> GitHubApiConnection = new(() =>
     {
-        var product = new ProductHeaderValue("Athenaeum Nuke Build", "1.0.0");
+        var product = new ProductHeaderValue("Athenaeum-Nuke-Build", "1.0.0");
 
         var credentials = new Credentials(GitHubActions.Token);
 
