@@ -53,6 +53,7 @@ jobs:
         run: ./build.sh Publish --build-changed
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           PublishNugetPackages: ${{ vars.PUBLISH_NUGET }}
           NugetFeed: ${{ vars.NUGET_FEED }}

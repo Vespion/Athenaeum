@@ -48,7 +48,7 @@ partial class Build : NukeBuild
     {
         var product = new ProductHeaderValue("Athenaeum-Nuke-Build", "1.0.0");
 
-        var credentials = new Credentials(GitHubActions.Token);
+        var credentials = new Credentials(Environment.GetEnvironmentVariable("GITHUB_TOKEN"));
 
         var connection = new Connection(product, new InMemoryCredentialStore(credentials));
         return new ApiConnection(connection);
