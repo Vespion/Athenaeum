@@ -26,11 +26,13 @@ partial class Build
 	[Parameter("The timeout for running mutation tests in minutes.")]
 	readonly int MutationTestTimeout = TestTimeout * 2;
 	
+	//When running on the server, we don't want to fail the build if the coverage is below the threshold.
+	//This is because the server build will generate a check run which will block the commit if it fails.
 	[Parameter("The threshold for code coverage.")]
 	readonly int CoverageThreshold = IsServerBuild ? 0 : 80;
 	
 	[Parameter("The threshold for mutation tests.")]
-	readonly int MutationThreshold = IsServerBuild ? 100 : 0;
+	readonly int MutationThreshold = IsServerBuild ? 0 : 100;
 	
 	[PublicAPI]
 	Target Test => _ => _
@@ -85,11 +87,9 @@ partial class Build
 			foreach (var testProject in testProjects)
 			{
 				var resultsDirectory = TestResultsDirectory / testProject.Name;
-
-				var mutationThreshold = IsServerBuild ? $"-b {MutationThreshold}" : "";
 				
 				Stryker(
-					$"-O {resultsDirectory} -r Json -r Html -r Progress {mutationThreshold} --target-framework net7.0",
+					$"-O {resultsDirectory} -r Json -r Html -r Progress -b {MutationThreshold} --target-framework net7.0",
 					testProject.Directory,
 					timeout: (int?)TimeSpan.FromMinutes(MutationTestTimeout).TotalMilliseconds
 				);
@@ -105,6 +105,9 @@ partial class Build
 		.Unlisted()
 		.Executes(async () =>
 		{
+			var repositoryName = GitHubActions.Repository.Split('/')[1];
+			var repositoryOwnerName = GitHubActions.Repository.Split('/')[0];
+			
 			var reports = GlobFiles(TestResultsDirectory, "**/reports/mutation-report.json");
 
 			var client = new ChecksClient(GitHubApiConnection.Value);
@@ -115,7 +118,7 @@ partial class Build
 				StartedAt = DateTimeOffset.Now
 			};
 			
-			var check = await client.Run.Create(GitHubActions.RepositoryOwner, GitHubActions.Repository, newCheck);
+			var check = await client.Run.Create(repositoryOwnerName, repositoryName, newCheck);
 			
 			var annotations = new List<NewCheckRunAnnotation>();
 
@@ -264,7 +267,7 @@ Results for commit {GitHubActions.Sha}";
 					}
 				};
 
-				check = await client.Run.Update(GitHubActions.RepositoryOwner, GitHubActions.Repository, check.Id, update);
+				check = await client.Run.Update(repositoryOwnerName, repositoryName, check.Id, update);
 			}
 
 			update = new CheckRunUpdate
@@ -278,6 +281,6 @@ Results for commit {GitHubActions.Sha}";
 				}
 			};
 			
-			await client.Run.Update(GitHubActions.RepositoryOwner, GitHubActions.Repository, check.Id, update);
+			await client.Run.Update(repositoryOwnerName, repositoryName, check.Id, update);
 		});
 }
