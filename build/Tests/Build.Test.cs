@@ -35,6 +35,8 @@ partial class Build
 	
 	[Parameter("The threshold for mutation tests.")]
 	readonly int MutationThreshold = IsServerBuild ? 0 : 100;
+
+	bool TestRunSkipped = false;
 	
 	[PublicAPI]
 	Target Test => _ => _
@@ -54,6 +56,7 @@ partial class Build
 			if (testProjects.Length == 0)
 			{
 				//No tests to run
+				TestRunSkipped = true;
 				return;
 			}
 
@@ -127,7 +130,7 @@ partial class Build
 
 	[PublicAPI]
 	Target PublishMutationTestResults => _ => _
-		.Requires(() => IsServerBuild)
+		.Requires(() => IsServerBuild && !TestRunSkipped)
 		.Description("Publishes the mutation test results as a check run.")
 		.TriggeredBy(Test)
 		.ProceedAfterFailure()
