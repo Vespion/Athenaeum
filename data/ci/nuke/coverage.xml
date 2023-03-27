@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<coverage line-rate="0.3062" branch-rate="0.2626" version="1.9" timestamp="1679879364" lines-covered="151" lines-valid="493" branches-covered="26" branches-valid="99">
+<coverage line-rate="0.3062" branch-rate="0.2626" version="1.9" timestamp="1679879887" lines-covered="151" lines-valid="493" branches-covered="26" branches-valid="99">
   <sources />
   <packages>
     <package name="VespionSoftworks.Athenaeum.Plugins.Abstractions" line-rate="0.4782" branch-rate="0.1666" complexity="7">
