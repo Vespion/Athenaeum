@@ -288,8 +288,8 @@ Results for commit {GitHubActions.Sha}";
 			Log.Debug("All run annotations have been posted to GitHub");
 			
 			var commitClient = new CommitStatusClient(GetGithubApiConnection());
-
-			await commitClient.Create(RepositoryId, GitHubActions.HeadRef, new NewCommitStatus
+			
+			await commitClient.Create(repositoryOwnerName, repositoryName, GitHubActions.Sha, new NewCommitStatus
 			{
 				Context = "mutation-tests",
 				Description = checkSummaryPassStatus,
