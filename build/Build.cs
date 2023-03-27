@@ -43,6 +43,8 @@ partial class Build : NukeBuild
     static readonly AbsolutePath TraversalProject = RootDirectory / "affected.proj";
 
     readonly GitHubActions GitHubActions = GitHubActions.Instance;
+    [Nuke.Common.Parameter("The GitHub repository ID.")]
+    readonly long RepositoryId = 0;
 
     IApiConnection GetGithubApiConnection()
     {

@@ -114,7 +114,7 @@ partial class Build
 
 			var client = new ChecksClient(GetGithubApiConnection());
 
-			var newCheck = new NewCheckRun("Mutation Tests Results", GitHubActions.Sha)
+			var newCheck = new NewCheckRun("mutation-tests", GitHubActions.Sha)
 			{
 				Status = CheckStatus.InProgress,
 				StartedAt = DateTimeOffset.Now
@@ -206,15 +206,13 @@ partial class Build
 							(int)mutant.Location.End.Line,
 							level,
 							description.ToString()
-						);
-						// {
-						// 	StartColumn = (int?)mutant.Location.Start.Column,
-						// 	EndColumn = (int?)mutant.Location.End.Column,
-						// 	RawDetails = mutant.ToJson(),
-						// 	Title = title
-						// };
-						
-						Log.Verbose("Adding annotation ({@Annotation}) for mutant {Mutant} in file {File}", annotations, mutant.Id, filePath);
+						)
+						{
+							StartColumn = (int)mutant.Location.Start.Column,
+							EndColumn = (int)mutant.Location.End.Column,
+							// RawDetails = mutant.ToJson(),
+							Title = title
+						};
 						
 						annotations.Add(annotation);
 					}
@@ -243,9 +241,9 @@ partial class Build
 			
 			var checkConclusion = mutationScore >= MutationThreshold ? CheckConclusion.Success : CheckConclusion.Failure;
 
-			var annotationChunks = annotations.Chunk(50).ToArray();
+			var annotationChunks = annotations.Chunk(45).ToArray();
 			
-			var checkSummaryPassStatus = mutationScore >= MutationThreshold ? ":white_check_mark: Mutation coverage threshold passed!" : ":x: Mutation coverage threshold missed!";
+			var checkSummaryPassStatus = checkConclusion == CheckConclusion.Success ? ":white_check_mark: Mutation coverage threshold passed!" : ":x: Mutation coverage threshold missed!";
 			
 			var checkSummary = $@"# Mutation Tests
 
@@ -286,5 +284,7 @@ Results for commit {GitHubActions.Sha}";
 			};
 			
 			await client.Run.Update(repositoryOwnerName, repositoryName, check.Id, update);
+			
+			Log.Debug("All run annotations have been posted to GitHub");
 		});
 }

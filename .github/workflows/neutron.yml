@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-20.04
     permissions:
       checks: write
+      statuses: write
       pull-requests: write
       contents: write # Required for tagging and for publishing coverage diffs
       issues: read
@@ -53,6 +54,7 @@ jobs:
         run: ./build.sh Publish --build-changed
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
+          RepositoryId: ${{ github.repository_id }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           PublishNugetPackages: ${{ vars.PUBLISH_NUGET }}
