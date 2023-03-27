@@ -286,5 +286,16 @@ Results for commit {GitHubActions.Sha}";
 			await client.Run.Update(repositoryOwnerName, repositoryName, check.Id, update);
 			
 			Log.Debug("All run annotations have been posted to GitHub");
+			
+			var commitClient = new CommitStatusClient(GetGithubApiConnection());
+
+			await commitClient.Create(RepositoryId, GitHubActions.HeadRef, new NewCommitStatus
+			{
+				Context = "mutation-tests",
+				Description = checkSummaryPassStatus,
+				State = checkConclusion == CheckConclusion.Success ? CommitState.Success : CommitState.Failure
+			});
+			
+			Log.Debug("Commit status updated");
 		});
 }
