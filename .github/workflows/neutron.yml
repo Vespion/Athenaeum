@@ -87,10 +87,10 @@ jobs:
           # Minimum total coverage, if you want to the
           # workflow to enforce it as a standard.
           # This has no effect if the `fail` arg is set to `false`.
-          threshold: 80
+          threshold: ${{ vars.MINIMUM_COVERAGE }}
           # Fail the workflow if the minimum code coverage
           # reuqirements are not satisfied.
-          fail: true
+          fail: ${{ vars.FAIL_ON_UNIT_COVERAGE }}
           # Publish the rendered output as a PR comment
           publish: true
           # Create a coverage diff report.
