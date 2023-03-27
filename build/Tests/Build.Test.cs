@@ -101,6 +101,7 @@ partial class Build
 		.Requires(() => IsServerBuild)
 		.Description("Publishes the mutation test results as a check run.")
 		.DependsOn(Test)
+		.TriggeredBy(Test)
 		.ProceedAfterFailure()
 		.Unlisted()
 		.Executes(async () =>
