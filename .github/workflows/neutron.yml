@@ -1,0 +1,111 @@
+name: Neutron
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: neutron-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-20.04
+    permissions:
+      checks: write
+      statuses: write
+      pull-requests: write
+      contents: write # Required for tagging and for publishing coverage diffs
+      issues: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
+        with:
+          fetch-depth: 0 # Get the full history so that versioning works
+
+      - name: Cache NuGet
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/global.json', '**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+            -nuget-
+
+      - name: Cache .nuke/temp
+        uses: actions/cache@v3
+        with:
+          path: |
+            .nuke/temp
+          key: nuke
+
+      - uses: nrwl/nx-set-shas@v3
+        id: last_successful_commit
+        name: Find affected commit range
+
+      - name: Run 'Publish' target
+        run: ./build.sh Publish --build-changed
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+          RepositoryId: ${{ github.repository_id }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
+          PublishNugetPackages: ${{ vars.PUBLISH_NUGET }}
+          NugetFeed: ${{ vars.NUGET_FEED }}
+          To: ${{ steps.last_successful_commit.outputs.head }}
+          From: ${{ steps.last_successful_commit.outputs.base }}
+
+      - uses: actions/upload-artifact@v3
+        if: always() # Always upload the test results, even if the tests fail
+        name: Upload test results
+        with:
+          name: test_results
+          path: artifacts/test_results
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() # Always upload the test results, even if the tests fail
+        with:
+          commit: ${{ github.event.workflow_run.head_sha }}
+          event_file: ${{ github.event_path }}
+          event_name: ${{ github.event.workflow_run.event }}
+          files: "artifacts/test_results/**/TestResults.xml"
+
+      - name: Publish coverage report
+        uses: insightsengineering/coverage-action@v2
+        if: always() # Always upload the test results, even if the tests fail
+        with:
+          # Path to the Cobertura XML report.
+          path: artifacts/test_results/coverage.xml
+          # Minimum total coverage, if you want to the
+          # workflow to enforce it as a standard.
+          # This has no effect if the `fail` arg is set to `false`.
+          threshold: ${{ vars.MINIMUM_COVERAGE }}
+          # Fail the workflow if the minimum code coverage
+          # reuqirements are not satisfied.
+          fail: ${{ vars.FAIL_ON_UNIT_COVERAGE }}
+          # Publish the rendered output as a PR comment
+          publish: true
+          # Create a coverage diff report.
+          diff: true
+          # Branch to diff against.
+          # Compare the current coverage to the coverage
+          # determined on this branch.
+          diff-branch: main
+          # This is where the coverage reports for the
+          # `diff-branch` are stored.
+          # Branch is created if it doesn't already exist'.
+          diff-storage: _xml_coverage_reports
+
+      - uses: actions/upload-artifact@v3
+        name: Upload packages
+        with:
+          name: packages
+          path: artifacts/packages

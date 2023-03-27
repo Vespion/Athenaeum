@@ -126,6 +126,13 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+**/Generated.Build.props
+
+# Build system
+affected.proj
+/obj
+packages.lock.json
+.nuke/temp
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

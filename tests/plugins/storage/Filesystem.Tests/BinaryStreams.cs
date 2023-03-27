@@ -1,8 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using VespionSoftworks.Athenaeum.Plugins.Storage.Abstractions;
-using VespionSoftworks.Athenaeum.TestUtilities.Logger;
 using Xunit;
 using Xunit.Abstractions;
 

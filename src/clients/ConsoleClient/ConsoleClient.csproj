@@ -55,32 +55,5 @@
       <ProjectReference Include="..\..\plugins\storage\StoragePluginAbstractions\StoragePluginAbstractions.csproj" />
       <ProjectReference Include="..\..\utilities\PluginHostUtilities\PluginHostUtilities.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-        <PluginReference Visible="false" Include="..\..\plugins\storage\StoragePluginAbstractions\StoragePluginAbstractions.csproj" />
-        <PluginReference Visible="false" Include="..\..\plugins\storage\FilesystemStorage\FilesystemStorage.csproj" />
-        <PluginReference Visible="false" Include="..\..\plugins\PluginAbstractions\PluginAbstractions.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Commands\Plugin" />
-    </ItemGroup>
-    
-    <Target Name="ExpandPluginPackagePaths">
-        <CreateItem Include="@(PluginReference -> '%(RelativeDir)bin/$(Configuration)/*')">
-            <Output TaskParameter="Include" ItemName="PluginPackages" />
-        </CreateItem>
-        <Message Importance="normal" Text="Found @(PluginPackages-&gt;Count()) plugin packages" />
-        <Message Text="@(PluginPackages, ', ')" Importance="low" />
-    </Target>
-    
-    <Target Name="Plugins" DependsOnTargets="ExpandPluginPackagePaths" AfterTargets="Build" Condition=" $(Configuration) == 'Debug'" Inputs="@(PluginReference)" Outputs="@(PluginPackages -&gt; $(SolutionDir).cache/nuget/feed/%(Filename)%(Extension))">
-        
-        <Message Importance="normal" Text="Readying built-in plugins" />
-        <MSBuild Projects="@(PluginReference)" Targets="Pack" BuildInParallel="$(BuildInParallel)" Properties="Configuration=$(Configuration)" />
-        
-        <Message Importance="normal" Text="Copying built-in plugins to solution feed" />
-        <Copy SourceFiles="@(PluginPackages)" DestinationFolder="$(SolutionDir).cache/nuget/feed/" />
-    </Target>
     
 </Project>

@@ -7,6 +7,18 @@
       "commands": [
         "dotnet-stryker"
       ]
+    },
+    "nuke.globaltool": {
+      "version": "6.3.0",
+      "commands": [
+        "nuke"
+      ]
+    },
+    "dotnet-affected": {
+      "version": "3.1.1",
+      "commands": [
+        "dotnet-affected"
+      ]
     }
   }
 }

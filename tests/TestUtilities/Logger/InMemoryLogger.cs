@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-
+[assembly: ExcludeFromCodeCoverage]
 namespace VespionSoftworks.Athenaeum.TestUtilities.Logger;
 
 public class InMemoryLogger: ILogger
