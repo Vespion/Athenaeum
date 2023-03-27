@@ -42,18 +42,23 @@ partial class Build : NukeBuild
     static readonly AbsolutePath TestResultsDirectory = ArtifactsDirectory / "test_results";
     static readonly AbsolutePath TraversalProject = RootDirectory / "affected.proj";
 
-    static readonly GitHubActions GitHubActions = GitHubActions.Instance;
+    readonly GitHubActions GitHubActions = GitHubActions.Instance;
 
-    readonly Lazy<IApiConnection> GitHubApiConnection = new(() =>
+    readonly Lazy<IApiConnection> GitHubApiConnection;
+
+    public Build()
     {
-        var product = new ProductHeaderValue("Athenaeum-Nuke-Build", "1.0.0");
+        GitHubApiConnection = new Lazy<IApiConnection>(() =>
+        {
+            var product = new ProductHeaderValue("Athenaeum-Nuke-Build", "1.0.0");
 
-        var credentials = new Credentials(GitHubActions.Token);
+            var credentials = new Credentials(GitHubActions.Token);
 
-        var connection = new Connection(product, new InMemoryCredentialStore(credentials));
-        return new ApiConnection(connection);
-    });
-    
+            var connection = new Connection(product, new InMemoryCredentialStore(credentials));
+            return new ApiConnection(connection);
+        });
+    }
+
     [PublicAPI]
     Target Clean => _ => _
         .Before(ResolveProjects)
