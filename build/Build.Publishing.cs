@@ -19,7 +19,12 @@ partial class Build
 		{
 			if (PublishNugetPackages)
 			{
+				Log.Debug("Publishing NuGet packages");
 				PublishToNugetFeed();
+			}
+			else
+			{
+				Log.Debug("Skipping NuGet package publishing");
 			}
 		});
 	

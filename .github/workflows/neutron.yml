@@ -54,6 +54,8 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
+          PublishNugetPackages: ${{ vars.PUBLISH_NUGET }}
+          NugetFeed: ${{ vars.NUGET_FEED }}
           To: ${{ steps.last_successful_commit.outputs.head }}
           From: ${{ steps.last_successful_commit.outputs.base }}
 
