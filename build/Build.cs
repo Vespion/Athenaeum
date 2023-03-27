@@ -44,21 +44,16 @@ partial class Build : NukeBuild
 
     readonly GitHubActions GitHubActions = GitHubActions.Instance;
 
-    readonly Lazy<IApiConnection> GitHubApiConnection;
-
-    public Build()
+    IApiConnection GetGithubApiConnection()
     {
-        GitHubApiConnection = new Lazy<IApiConnection>(() =>
-        {
-            var product = new ProductHeaderValue("Athenaeum-Nuke-Build", "1.0.0");
+        var product = new ProductHeaderValue("Athenaeum-Nuke-Build", "1.0.0");
 
-            var credentials = new Credentials(GitHubActions.Token);
+        var credentials = new Credentials(GitHubActions.Token);
 
-            var connection = new Connection(product, new InMemoryCredentialStore(credentials));
-            return new ApiConnection(connection);
-        });
+        var connection = new Connection(product, new InMemoryCredentialStore(credentials));
+        return new ApiConnection(connection);
     }
-
+    
     [PublicAPI]
     Target Clean => _ => _
         .Before(ResolveProjects)

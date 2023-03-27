@@ -15,6 +15,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.IO.TextTasks;
 
+// ReSharper disable CheckNamespace
 partial class Build
 {
 	[PackageExecutable("dotnet-stryker", "Stryker.CLI.dll", Framework = "net7.0")]
@@ -100,7 +101,6 @@ partial class Build
 	Target PublishMutationTestResults => _ => _
 		.Requires(() => IsServerBuild)
 		.Description("Publishes the mutation test results as a check run.")
-		.DependsOn(Test)
 		.TriggeredBy(Test)
 		.ProceedAfterFailure()
 		.Unlisted()
@@ -111,7 +111,7 @@ partial class Build
 			
 			var reports = GlobFiles(TestResultsDirectory, "**/reports/mutation-report.json");
 
-			var client = new ChecksClient(GitHubApiConnection.Value);
+			var client = new ChecksClient(GetGithubApiConnection());
 
 			var newCheck = new NewCheckRun("Mutation Tests Results", GitHubActions.Sha)
 			{
