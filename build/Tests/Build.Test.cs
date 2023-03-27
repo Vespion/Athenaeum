@@ -11,6 +11,7 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Coverlet;
 using Nuke.Common.Tools.DotNet;
 using Octokit;
+using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.IO.TextTasks;
@@ -198,20 +199,22 @@ partial class Build
 							description.AppendLine();
 							description.AppendLine("Replacement: ").AppendLine(mutant.Replacement);
 						}
-						
+
 						var annotation = new NewCheckRunAnnotation(
 							filePath,
 							(int)mutant.Location.Start.Line,
 							(int)mutant.Location.End.Line,
 							level,
 							description.ToString()
-						)
-						{
-							StartColumn = (int?)mutant.Location.Start.Column,
-							EndColumn = (int?)mutant.Location.End.Column,
-							RawDetails = mutant.ToJson(),
-							Title = title
-						};
+						);
+						// {
+						// 	StartColumn = (int?)mutant.Location.Start.Column,
+						// 	EndColumn = (int?)mutant.Location.End.Column,
+						// 	RawDetails = mutant.ToJson(),
+						// 	Title = title
+						// };
+						
+						Log.Verbose("Adding annotation ({@Annotation}) for mutant {Mutant} in file {File}", annotations, mutant.Id, filePath);
 						
 						annotations.Add(annotation);
 					}
