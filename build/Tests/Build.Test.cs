@@ -208,9 +208,9 @@ partial class Build
 							description.ToString()
 						)
 						{
-							StartColumn = (int)mutant.Location.Start.Column,
-							EndColumn = (int)mutant.Location.End.Column,
-							// RawDetails = mutant.ToJson(),
+							StartColumn = mutant.Location.Start.Line == mutant.Location.End.Line ? (int)mutant.Location.Start.Column : null,
+							EndColumn = mutant.Location.Start.Line == mutant.Location.End.Line ? (int)mutant.Location.End.Column : null,
+							RawDetails = mutant.ToJson(),
 							Title = title
 						};
 						
