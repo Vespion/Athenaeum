@@ -15,6 +15,7 @@ using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.IO.TextTasks;
+using Project = Nuke.Common.ProjectModel.Project;
 
 // ReSharper disable CheckNamespace
 partial class Build
@@ -35,6 +36,19 @@ partial class Build
 	
 	[Parameter("The threshold for mutation tests.")]
 	readonly int MutationThreshold = IsServerBuild ? 0 : 100;
+
+	bool TestRunSkipped;
+
+	Project[] GetTestProjects()
+	{
+		var traversalProject = ProjectModelTasks.ParseProject(TraversalProject);
+		
+		return traversalProject.GetItems("ProjectReference")
+			.Where(x => x.EvaluatedInclude.EndsWith(".Tests.csproj"))
+			.Select(x => x.EvaluatedInclude)
+			.Select(Solution.GetProject)
+			.ToArray();
+	}
 	
 	[PublicAPI]
 	Target Test => _ => _
@@ -43,49 +57,71 @@ partial class Build
 		.Produces(TestResultsDirectory / "**" / "*.xml", TestResultsDirectory / "**" / "*.json")
 		.Executes(() =>
 		{
-			var traversalProject = ProjectModelTasks.ParseProject(TraversalProject);
+			var testProjects = GetTestProjects();
 
-			var testProjects = traversalProject.GetItems("ProjectReference")
-				.Where(x => x.EvaluatedInclude.EndsWith(".Tests.csproj"))
-				.Select(x => x.EvaluatedInclude)
-				.Select(Solution.GetProject)
-				.ToArray();
+			if (testProjects.Length == 0)
+			{
+				//No tests to run
+				TestRunSkipped = true;
+				return;
+			}
 
-			DotNetTest(c => c
-				.EnableNoBuild()
-				.SetBlameHangTimeout($"{TestTimeout}m")
-				.EnableCollectCoverage()
-				.SetCoverletOutputFormat(CoverletOutputFormat.json)
-				.AddLoggers("xunit")
-				.SetProperty("Exclude", "[xunit.*]*")
-				.SetProperty("SkipAutoProps", "true")
-				.SetProperty("DeterministicReport", "true")
-				.SetProperty("Threshold", CoverageThreshold)
-				.CombineWith(testProjects[..^1], (_, p) => _
-					.SetProjectFile(p)
-					.SetResultsDirectory(TestResultsDirectory / p.Name)
-					.SetCoverletOutput(TestResultsDirectory / "coverage.json")
+			if (testProjects.Length > 2)
+			{
+				DotNetTest(c => c
+						.EnableNoBuild()
+						.SetBlameHangTimeout($"{TestTimeout}m")
+						.EnableCollectCoverage()
+						.SetCoverletOutputFormat(CoverletOutputFormat.json)
+						.AddLoggers("xunit")
+						.SetProperty("Exclude", "[xunit.*]*")
+						.SetProperty("SkipAutoProps", "true")
+						.SetProperty("DeterministicReport", "true")
+						.SetProperty("Threshold", CoverageThreshold)
+						.CombineWith(testProjects[..^1], (_, p) => _
+							.SetProjectFile(p)
+							.SetResultsDirectory(TestResultsDirectory / p.Name)
+							.SetCoverletOutput(TestResultsDirectory / "coverage.json")
+							.SetProperty("MergeWith", TestResultsDirectory / "coverage.json")
+						), 1, //This cannot run in parallel because it would overwrite the coverage file
+					true
+				);
+
+				DotNetTest(c => c
+					.EnableNoBuild()
+					.SetBlameHangTimeout($"{TestTimeout}m")
+					.EnableCollectCoverage()
+					.SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+					.AddLoggers("xunit")
+					.SetProperty("Exclude", "[xunit.*]*")
+					.SetProperty("SkipAutoProps", "true")
+					.SetProperty("DeterministicReport", "true")
+					.SetProperty("Threshold", CoverageThreshold)
+					.SetProjectFile(testProjects[^1])
+					.SetResultsDirectory(TestResultsDirectory / testProjects[^1].Name)
+					.SetCoverletOutput(TestResultsDirectory / "coverage.xml")
 					.SetProperty("MergeWith", TestResultsDirectory / "coverage.json")
-				), 1, //This cannot run in parallel because it would overwrite the coverage file
-				true
-			);
-			
-			DotNetTest(c => c
-				.EnableNoBuild()
-				.SetBlameHangTimeout($"{TestTimeout}m")
-				.EnableCollectCoverage()
-				.SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
-				.AddLoggers("xunit")
-				.SetProperty("Exclude", "[xunit.*]*")
-				.SetProperty("SkipAutoProps", "true")
-				.SetProperty("DeterministicReport", "true")
-				.SetProperty("Threshold", CoverageThreshold)
-				.SetProjectFile(testProjects[^1])
-				.SetResultsDirectory(TestResultsDirectory / testProjects[^1].Name)
-				.SetCoverletOutput(TestResultsDirectory / "coverage.xml")
-				.SetProperty("MergeWith", TestResultsDirectory / "coverage.json")
-			);
-			
+				);
+			}
+			else
+			{
+				DotNetTest(c => c
+					.EnableNoBuild()
+					.SetBlameHangTimeout($"{TestTimeout}m")
+					.EnableCollectCoverage()
+					.SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+					.AddLoggers("xunit")
+					.SetProperty("Exclude", "[xunit.*]*")
+					.SetProperty("SkipAutoProps", "true")
+					.SetProperty("DeterministicReport", "true")
+					.SetProperty("Threshold", CoverageThreshold)
+					.SetProjectFile(testProjects[0])
+					.SetResultsDirectory(TestResultsDirectory / testProjects[^1].Name)
+					.SetCoverletOutput(TestResultsDirectory / "coverage.xml")
+					.SetProperty("MergeWith", TestResultsDirectory / "coverage.json")
+				);
+			}
+
 			foreach (var testProject in testProjects)
 			{
 				var resultsDirectory = TestResultsDirectory / testProject.Name;
@@ -101,6 +137,7 @@ partial class Build
 	[PublicAPI]
 	Target PublishMutationTestResults => _ => _
 		.Requires(() => IsServerBuild)
+		.OnlyWhenDynamic(() => GetTestProjects().Length > 0 && !TestRunSkipped)
 		.Description("Publishes the mutation test results as a check run.")
 		.TriggeredBy(Test)
 		.ProceedAfterFailure()

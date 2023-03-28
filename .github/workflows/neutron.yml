@@ -69,18 +69,32 @@ jobs:
           name: test_results
           path: artifacts/test_results
 
+      - name: Check Test Results File Existence
+        uses: andstor/file-existence-action@v2
+        id: check_results_file
+        if: always() # Always upload the test results, even if the tests fail
+        with:
+          files: artifacts/test_results/**/TestResults.xml
+
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always() # Always upload the test results, even if the tests fail
+        if: ${{ steps.check_results_file.outputs.files_exists == 'true' }}
         with:
           commit: ${{ github.event.workflow_run.head_sha }}
           event_file: ${{ github.event_path }}
           event_name: ${{ github.event.workflow_run.event }}
           files: "artifacts/test_results/**/TestResults.xml"
 
+      - name: Check Coverage File Existence
+        uses: andstor/file-existence-action@v2
+        id: check_coverage_file
+        if: always() # Always upload the test results, even if the tests fail
+        with:
+          files: artifacts/test_results/coverage.xml
+
       - name: Publish coverage report
         uses: insightsengineering/coverage-action@v2
-        if: always() # Always upload the test results, even if the tests fail
+        if: ${{ steps.check_coverage_file.outputs.files_exists == 'true' }}
         with:
           # Path to the Cobertura XML report.
           path: artifacts/test_results/coverage.xml
