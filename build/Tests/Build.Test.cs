@@ -15,6 +15,7 @@ using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.IO.TextTasks;
+using Project = Nuke.Common.ProjectModel.Project;
 
 // ReSharper disable CheckNamespace
 partial class Build
@@ -36,7 +37,18 @@ partial class Build
 	[Parameter("The threshold for mutation tests.")]
 	readonly int MutationThreshold = IsServerBuild ? 0 : 100;
 
-	bool TestRunSkipped = false;
+	bool TestRunSkipped;
+
+	Lazy<Project[]> TestProjects = new(() =>
+	{
+		var traversalProject = ProjectModelTasks.ParseProject(TraversalProject);
+		
+		return traversalProject.GetItems("ProjectReference")
+			.Where(x => x.EvaluatedInclude.EndsWith(".Tests.csproj"))
+			.Select(x => x.EvaluatedInclude)
+			.Select(Solution.GetProject)
+			.ToArray();
+	});
 	
 	[PublicAPI]
 	Target Test => _ => _
@@ -45,13 +57,7 @@ partial class Build
 		.Produces(TestResultsDirectory / "**" / "*.xml", TestResultsDirectory / "**" / "*.json")
 		.Executes(() =>
 		{
-			var traversalProject = ProjectModelTasks.ParseProject(TraversalProject);
-
-			var testProjects = traversalProject.GetItems("ProjectReference")
-				.Where(x => x.EvaluatedInclude.EndsWith(".Tests.csproj"))
-				.Select(x => x.EvaluatedInclude)
-				.Select(Solution.GetProject)
-				.ToArray();
+			var testProjects = TestProjects.Value;
 
 			if (testProjects.Length == 0)
 			{
@@ -130,7 +136,8 @@ partial class Build
 
 	[PublicAPI]
 	Target PublishMutationTestResults => _ => _
-		.Requires(() => IsServerBuild && !TestRunSkipped)
+		.Requires(() => IsServerBuild)
+		.OnlyWhenDynamic(() => TestProjects.Value.Length > 0 && !TestRunSkipped)
 		.Description("Publishes the mutation test results as a check run.")
 		.TriggeredBy(Test)
 		.ProceedAfterFailure()
