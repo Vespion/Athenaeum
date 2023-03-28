@@ -39,7 +39,7 @@ partial class Build
 
 	bool TestRunSkipped;
 
-	Lazy<Project[]> TestProjects = new(() =>
+	Project[] GetTestProjects()
 	{
 		var traversalProject = ProjectModelTasks.ParseProject(TraversalProject);
 		
@@ -48,7 +48,7 @@ partial class Build
 			.Select(x => x.EvaluatedInclude)
 			.Select(Solution.GetProject)
 			.ToArray();
-	});
+	}
 	
 	[PublicAPI]
 	Target Test => _ => _
@@ -57,7 +57,7 @@ partial class Build
 		.Produces(TestResultsDirectory / "**" / "*.xml", TestResultsDirectory / "**" / "*.json")
 		.Executes(() =>
 		{
-			var testProjects = TestProjects.Value;
+			var testProjects = GetTestProjects();
 
 			if (testProjects.Length == 0)
 			{
@@ -137,7 +137,7 @@ partial class Build
 	[PublicAPI]
 	Target PublishMutationTestResults => _ => _
 		.Requires(() => IsServerBuild)
-		.OnlyWhenDynamic(() => TestProjects.Value.Length > 0 && !TestRunSkipped)
+		.OnlyWhenDynamic(() => GetTestProjects().Length > 0 && !TestRunSkipped)
 		.Description("Publishes the mutation test results as a check run.")
 		.TriggeredBy(Test)
 		.ProceedAfterFailure()

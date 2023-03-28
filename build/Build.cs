@@ -32,7 +32,7 @@ partial class Build : NukeBuild
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Solution(GenerateProjects = true)]
-    static readonly Solution Solution = null!;
+    readonly Solution Solution = null!;
     
     [GitRepository]
     readonly GitRepository Repository = null!;
