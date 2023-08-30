@@ -46,7 +46,7 @@
             <!-- A logging implementation will be provided by all hosts -->
             <ExcludeAssets>runtime</ExcludeAssets>
         </PackageReference>
-        <PackageReference Include="TestableIO.System.IO.Abstractions" Version="19.2.4" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions" Version="19.2.69" />
         <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.4" />
     </ItemGroup>
 
