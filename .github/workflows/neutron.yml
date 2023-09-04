@@ -24,7 +24,7 @@ jobs:
       issues: read
       actions: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout
         with:
           fetch-depth: 0 # Get the full history so that versioning works
