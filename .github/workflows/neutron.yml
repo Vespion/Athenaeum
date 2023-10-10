@@ -46,7 +46,7 @@ jobs:
             .nuke/temp
           key: nuke
 
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
         id: last_successful_commit
         name: Find affected commit range
 
